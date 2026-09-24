@@ -215,11 +215,13 @@
     .landing-footer a { color: inherit; text-decoration: none; }
     .landing-footer a:hover { color: rgba(var(--text-given-rgb), 0.7); text-decoration: underline; }
 
-    /* ── 지난 퍼즐 — 같은 카드 안에서 메인과 바꿔 보여 준다 (게임 쪽 지난 퍼즐 화면과 같은 모양) ── */
+    /* ── 카드 안 하위 화면(지난 퍼즐 · 자유 연습 · 통계) — 같은 카드 안에서 메인과 바꿔 보여 준다 ── */
     .landing-card { position: relative; }
     /* 카드 폭은 그대로 — 안쪽 여백만 줄여 달력 칸을 넓힌다 */
-    .landing-card.is-archive { padding-left: 22px; padding-right: 22px; }
-    .is-archive .landing-footer { display: none; }
+    .landing-card.is-sub { padding-left: 22px; padding-right: 22px; }
+    .is-sub .landing-footer { display: none; }
+    .is-sub .landing-date { display: none; }
+    .is-sub .landing-title { margin-bottom: 20px; }
     .landing-stack[hidden], .hub-back[hidden] { display: none; }
     .hub-back {
       position: absolute;
@@ -238,10 +240,10 @@
     }
     .hub-back:hover { background: var(--surface-1); color: var(--text-given); }
 
-    .archive-stack { gap: 11px; }
+    .sub-stack { gap: 11px; }
     .archive-note { margin: 0; font-size: 12px; color: rgba(var(--text-given-rgb), 0.55); }
-    .archive-type-toggle { display: flex; gap: 6px; }
-    .archive-type {
+    .mode-tabs { display: flex; gap: 6px; }
+    .mode-tab {
       flex: 1;
       height: 36px;
       border: none;
@@ -253,10 +255,10 @@
       font-weight: 700;
       cursor: pointer;
     }
-    .archive-type.active { background: var(--text-input); color: #fff; }
+    .mode-tab.active { background: var(--text-input); color: #fff; }
     .archive-error { margin: 0; font-size: 12px; color: var(--conflict); }
     .archive-error:empty { display: none; }
-    .archive-play {
+    .primary-btn {
       flex: none;
       height: 46px;
       margin-top: 4px;
@@ -266,8 +268,8 @@
       font-size: 15px;
       cursor: pointer;
     }
-    .archive-play:hover { background: var(--text-sel); }
-    .archive-play:disabled { opacity: 0.4; cursor: default; background: var(--text-input); }
+    .primary-btn:hover { background: var(--text-sel); }
+    .primary-btn:disabled { opacity: 0.4; cursor: default; background: var(--text-input); }
 
     .daily-cal-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 4px; }
     .daily-cal-title {
@@ -324,6 +326,78 @@
     }
     .cal-cell--filled .cal-day { color: rgba(255, 255, 255, 0.75); }
     .cal-val { font-size: 9px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+
+    /* ── 자유 연습 모드 고르기 (카드 안) ── */
+    .sub-title {
+      margin: 0;
+      font-family: 'Outfit', 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-given);
+    }
+
+    /* ── 통계 (카드 안) — 게임 통계창과 같은 내용 ── */
+    .stats-numbers { display: flex; }
+    .stats-num { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .stats-num strong {
+      font-family: 'Outfit', 'Inter', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--text-given);
+      font-variant-numeric: tabular-nums;
+    }
+    .stats-num span { font-size: 10px; color: rgba(var(--text-given-rgb), 0.55); }
+    .stats-seg { display: flex; gap: 4px; padding: 3px; border-radius: 10px; background: var(--surface-1); }
+    .stats-seg button {
+      flex: 1;
+      height: 26px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: rgba(var(--text-given-rgb), 0.6);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .stats-seg button.active { background: var(--surface-solid); color: var(--text-given); box-shadow: 0 1px 3px rgba(20, 24, 40, 0.12); }
+    .stats-pane { display: flex; flex-direction: column; gap: 6px; }
+    .stats-pane[hidden] { display: none; }
+    .stats-stack .cal-cell { aspect-ratio: 5 / 4; }
+    .stats-stack .daily-cal-nav { position: relative; }
+    .cal-share-row { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 6px; }
+    .mini-share {
+      padding: 4px 8px;
+      border: none;
+      border-radius: 8px;
+      background: var(--surface-1);
+      color: rgba(var(--text-given-rgb), 0.7);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .mini-share:hover { background: var(--surface-1-hover); color: var(--text-given); }
+    .share-note { font-size: 11px; font-weight: 600; color: var(--text-input); }
+    .cal-share-row .share-note { position: absolute; right: 0; top: calc(100% + 2px); white-space: nowrap; }
+    .share-note:empty { display: none; }
+    .dist-title { margin: 0 0 2px; font-size: 12px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.7); text-align: left; }
+    .dist-row { display: grid; grid-template-columns: 62px 1fr 24px; align-items: center; gap: 6px; font-size: 11px; }
+    .dist-label { text-align: left; white-space: nowrap; color: rgba(var(--text-given-rgb), 0.6); }
+    .dist-track { height: 14px; border-radius: 4px; background: var(--surface-1); overflow: hidden; }
+    .dist-fill { display: block; height: 100%; min-width: 2px; border-radius: 4px; background: var(--text-input); }
+    .dist-fill.fail { background: var(--conflict); }
+    .dist-count { text-align: right; font-weight: 700; color: rgba(var(--text-given-rgb), 0.7); font-variant-numeric: tabular-nums; }
+    .stats-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .stats-next { display: flex; flex-direction: column; align-items: flex-start; font-size: 10px; color: rgba(var(--text-given-rgb), 0.55); }
+    .stats-next strong {
+      font-family: 'Outfit', 'Inter', sans-serif;
+      font-size: 16px;
+      color: var(--text-given);
+      font-variant-numeric: tabular-nums;
+    }
+    .stats-share { flex: none; width: auto; height: 40px; margin: 0; padding: 0 22px; }
 
     /* ── 하단 점 (몇 번째 게임인지) ── */
     .hub-dots {
@@ -397,10 +471,12 @@
       .landing-btn { height: 48px; }
       .landing-mini-actions { margin-top: 0; }
       .landing-footer { margin-top: 14px; }
-      .landing-card.is-archive { padding-top: 44px; } /* ‹ 뒤로 와 제목이 겹치지 않게 */
-      .archive-stack { gap: 9px; }
-      .archive-type { height: 32px; }
-      .is-archive .cal-cell { aspect-ratio: 6 / 5; }
+      .landing-card.is-sub { padding-top: 44px; } /* ‹ 뒤로 와 제목이 겹치지 않게 */
+      .sub-stack { gap: 9px; }
+      .mode-tab { height: 32px; }
+      .is-sub .cal-cell { aspect-ratio: 6 / 5; }
+      .stats-stack .cal-cell { aspect-ratio: 3 / 2; }
+      .stats-num strong { font-size: 20px; }
     }
     @media (max-height: 560px) {
       .hub-slide {
@@ -421,12 +497,22 @@
       .landing-mini-btn { height: 30px; }
       .landing-footer { display: none; }
       /* 지난 퍼즐: 달력이 6줄인 달도 들어가도록 */
-      .archive-stack { gap: 8px; }
-      .is-archive .archive-note { display: none; }
-      .archive-type { height: 32px; }
-      .is-archive .cal-cell { aspect-ratio: 5 / 4; }
-      .landing-card.is-archive { padding-top: 40px; }
-      .archive-play { height: 40px; margin-top: 2px; }
+      .sub-stack { gap: 8px; }
+      .is-sub .archive-note { display: none; }
+      .mode-tab { height: 32px; }
+      .is-sub .cal-cell { aspect-ratio: 5 / 4; }
+      .landing-card.is-sub { padding-top: 40px; }
+      .primary-btn { height: 40px; margin-top: 2px; }
+      .is-sub .landing-title { margin-bottom: 12px; font-size: 20px; }
+      .stats-stack .cal-cell { aspect-ratio: 2 / 1; }
+      .stats-stack .cal-val { display: none; } /* 칸이 낮아 숫자 대신 색만 */
+      .stats-num strong { font-size: 18px; }
+      .stats-seg button { height: 24px; }
+      .dist-track { height: 10px; }
+      .stats-stack .stats-pane { gap: 3px; }
+      .stats-stack .mode-tab { height: 28px; }
+      .dist-row { font-size: 10px; }
+      .stats-share { height: 36px; }
     }
     /* 그래도 넘치는 극단적인 경우(가로 모드 등)만 카드가 아닌 화면 전체가 세로로 움직인다 */
     @media (max-height: 420px) {
@@ -441,21 +527,25 @@
   <nav id="hub-dots" class="hub-dots" aria-label="게임 선택"></nav>
 
   <script>
-    // ── 게임 목록 — 버튼 id는 각 게임 랜딩의 id 그대로 (게임 쪽 src/hub.js가 ?open= 으로 받아 눌러 준다) ──
+    // ── 게임 목록 ──
+    // dailies.open: 게임 랜딩 버튼 id (게임 쪽 src/hub.js가 ?open= 으로 받아 눌러 준다)
+    // modes: 지난 퍼즐 · 통계 모드 탭 / free: 자유 연습 모드 (없으면 바로 게임으로)
     const GAMES = [
       {
-        slug: 'sudoku', dir: 'DailySudoku', icon: '📝', title: '데일리 스도쿠',
-        archive: { firstDate: '2026-09-01', modes: [['standard', '스탠다드'], ['extended', '익스텐디드']],
-                   records: (mode) => sudokuRecords(`dsudoku:stats:${mode}`) },
+        slug: 'sudoku', dir: 'DailySudoku', icon: '📝', title: '데일리 스도쿠', firstDate: '2026-09-01',
+        modes: [['standard', '스탠다드'], ['extended', '익스텐디드']],
+        records: (mode) => sudokuRecords(`dsudoku:stats:${mode}`),
+        free: null,
         dailies: [
           { open: 'btn-daily-standard', name: '스탠다드', desc: '겹친 2판 · 요소 없음', status: (d) => sudokuStatus(d, 'standard') },
           { open: 'btn-daily-extended', name: '익스텐디드', desc: '겹친 2판 · 요소 2개', status: (d) => sudokuStatus(d, 'extended') },
         ],
       },
       {
-        slug: 'trilateral', dir: 'DailyTrilateral', icon: '🔺', title: '데일리 삼각관계',
-        archive: { firstDate: '2026-09-01', modes: [['standard', '스탠다드'], ['extended', '익스텐디드']],
-                   records: (mode) => guessRecords(mode === 'standard' ? 'trilateral:stats' : 'trilateral:stats:extended') },
+        slug: 'trilateral', dir: 'DailyTrilateral', icon: '🔺', title: '데일리 삼각관계', firstDate: '2026-09-01',
+        modes: [['standard', '스탠다드'], ['extended', '익스텐디드']],
+        records: (mode) => guessRecords(mode === 'standard' ? 'trilateral:stats' : 'trilateral:stats:extended'),
+        free: [['standard', '스탠다드', '3단 · 추측 4번'], ['extended', '익스텐디드', '3단 · 전체 단어 · 추측 5번']],
         dailies: [
           { open: 'btn-daily-play', name: '스탠다드', desc: '3단 · 추측 4번',
             status: (d) => guessStatus(d, 'trilateral:stats', 'trilateral:progress:' + d) },
@@ -464,9 +554,10 @@
         ],
       },
       {
-        slug: 'wordship', dir: 'DailyWordship', icon: '🚢', title: '데일리 워드십',
-        archive: { firstDate: '2026-09-23', modes: [['standard', '스탠다드'], ['idiom', '사자성어']],
-                   records: (mode) => guessRecords(mode === 'standard' ? 'wordship:stats' : 'wordship:stats:idiom') },
+        slug: 'wordship', dir: 'DailyWordship', icon: '🚢', title: '데일리 워드십', firstDate: '2026-09-23',
+        modes: [['standard', '스탠다드'], ['idiom', '사자성어']],
+        records: (mode) => guessRecords(mode === 'standard' ? 'wordship:stats' : 'wordship:stats:idiom'),
+        free: [['standard', '스탠다드', '8×8 · 함선 6척 · 추측 30번'], ['idiom', '사자성어', '8×8 · 사자성어 함선 5척 · 추측 20번']],
         dailies: [
           { open: 'btn-daily-play', name: '스탠다드', desc: '8×8 · 함선 6척 · 추측 30번',
             status: (d) => guessStatus(d, 'wordship:stats', 'wordship:progress:' + d, 30) },
@@ -478,18 +569,35 @@
     const DARK_KEYS = ['daily-dark-mode', 'sudoku-dark-mode', 'trilateral-dark-mode', 'wordship-dark-mode'];
 
     // ── 날짜 — 게임들과 같은 규칙: 데일리 경계 = KST 06:00 = UTC+3 자정 ──
+    const DAY_OFFSET_MS = 3 * 60 * 60 * 1000;
     function todayStr() {
-      const d = new Date(Date.now() + 3 * 60 * 60 * 1000);
-      return d.toISOString().slice(0, 10);
+      return new Date(Date.now() + DAY_OFFSET_MS).toISOString().slice(0, 10);
     }
-
     function shiftDate(dateStr, days) {
       const [y, m, d] = dateStr.split('-').map(Number);
       return new Date(Date.UTC(y, m - 1, d) + days * 86400000).toISOString().slice(0, 10);
     }
+    function untilNextReset() {
+      const t = Math.floor((86400000 - ((Date.now() + DAY_OFFSET_MS) % 86400000)) / 1000);
+      return [Math.floor(t / 3600), Math.floor(t / 60) % 60, t % 60].map((n) => String(n).padStart(2, '0')).join(':');
+    }
 
     function readJSON(key) {
       try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
+    }
+    async function copyText(text) {
+      try { await navigator.clipboard.writeText(text); return true; } catch { /* 아래 방식으로 */ }
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.append(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        ta.remove();
+        return ok;
+      } catch { return false; }
     }
 
     // ── 오늘 상태 배지 — 각 게임 랜딩의 표시 규칙을 그대로 옮김 ──
@@ -516,7 +624,7 @@
       return ['플레이 전', 'new'];
     }
 
-    // ── 지난 퍼즐 달력 칸 기록 — 각 게임 달력과 같은 표시 ──
+    // ── 달력 칸 기록 — 각 게임 달력과 같은 표시 ──
     // 스도쿠: 평균보다 빠를수록 진한 초록(시간) / 완성률이 낮을수록 진한 빨강(%)
     function calSolveColor(ms, avg) {
       if (!avg) return 'hsl(145 42% 45%)';
@@ -557,68 +665,74 @@
       };
     }
 
-    // ── 지난 퍼즐 뷰 (카드 안) — 날짜를 고르고 플레이하면 게임이 ?archive=날짜&mode=모드 로 바로 시작 ──
-    const CAL_WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-    function buildArchive(game) {
-      const cfg = game.archive;
-      const st = { mode: cfg.modes[0][0], selected: null, offset: 0 };
-      const view = el('div', 'landing-stack archive-stack');
-      view.hidden = true;
-      const note = el('p', 'archive-note', '연습용 — 통계·연승에 반영되지 않습니다.');
-      const toggle = el('div', 'archive-type-toggle');
-      const modeBtns = cfg.modes.map(([id, label]) => {
-        const b = el('button', 'archive-type', label);
-        b.type = 'button';
-        b.addEventListener('click', () => { st.mode = id; render(); }); // 달·고른 날짜는 유지
-        toggle.append(b);
+    // ── 공통 조각 ──
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    const link = (href, cls, text) => { const a = el('a', cls, text); a.href = href; return a; };
+    const button = (cls, text) => { const b = el('button', cls, text); b.type = 'button'; return b; };
+    const openUrl = (game, id) => `${game.dir}/?open=${id}`;
+    function flash(noteEl, text) {
+      noteEl.textContent = text;
+      clearTimeout(noteEl._t);
+      noteEl._t = setTimeout(() => { noteEl.textContent = ''; }, 2600);
+    }
+
+    // 모드 탭 (지난 퍼즐 · 통계 공용)
+    function modeTabs(game, onPick) {
+      const wrap = el('div', 'mode-tabs');
+      const btns = game.modes.map(([id, label]) => {
+        const b = button('mode-tab', label);
+        b.addEventListener('click', () => onPick(id));
+        wrap.append(b);
         return b;
       });
+      return { wrap, set: (mode) => btns.forEach((b, j) => b.classList.toggle('active', game.modes[j][0] === mode)) };
+    }
+
+    // 월 달력 (지난 퍼즐 · 통계 공용) — 게임 달력과 같은 규칙: 첫 달 이전·이번 달 이후로는 못 넘어감
+    const CAL_WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+    function monthCalendar(game, { pick = false, onPick = null } = {}) {
+      let offset = 0;
       const nav = el('div', 'daily-cal-nav');
-      const prev = el('button', 'daily-cal-arrow', '‹');
+      const prev = button('daily-cal-arrow', '‹');
       const title = el('h3', 'daily-cal-title');
-      const next = el('button', 'daily-cal-arrow', '›');
-      prev.type = next.type = 'button';
+      const next = button('daily-cal-arrow', '›');
       prev.setAttribute('aria-label', '이전 달');
       next.setAttribute('aria-label', '다음 달');
-      prev.addEventListener('click', () => { st.offset -= 1; render(); });
-      next.addEventListener('click', () => { if (st.offset < 0) { st.offset += 1; render(); } });
       nav.append(prev, title, next);
-      const cal = el('div', 'archive-cal');
-      const error = el('p', 'archive-error');
-      const play = el('button', 'landing-btn archive-play', '플레이');
-      play.type = 'button';
-      play.addEventListener('click', () => {
-        if (st.selected) location.href = `${game.dir}/?archive=${st.selected}&mode=${st.mode}`;
-      });
-      view.append(note, toggle, nav, cal, error, play);
+      const grid = el('div', 'archive-cal');
+      let last = null;
+      prev.addEventListener('click', () => { offset -= 1; draw(last); });
+      next.addEventListener('click', () => { if (offset < 0) { offset += 1; draw(last); } });
 
-      function render() {
+      function ym() {
+        const [ty, tm] = todayStr().split('-').map(Number);
+        const first = new Date(Date.UTC(ty, tm - 1 + offset, 1));
+        return { y: first.getUTCFullYear(), m: first.getUTCMonth() + 1, dow: first.getUTCDay() };
+      }
+      function draw(opts) {
+        last = opts;
+        const { mode, selected = null } = opts;
         const today = todayStr();
         const maxDate = shiftDate(today, -1);
-        const record = cfg.records(st.mode);
-        modeBtns.forEach((b, j) => b.classList.toggle('active', cfg.modes[j][0] === st.mode));
-        error.textContent = today <= cfg.firstDate ? '아직 지난 퍼즐이 없어요 — 내일부터 열려요.' : '';
-        play.disabled = !st.selected;
-
-        const [ty, tm] = today.split('-').map(Number);
-        const first = new Date(Date.UTC(ty, tm - 1 + st.offset, 1));
-        const y = first.getUTCFullYear(), m = first.getUTCMonth() + 1, mm = String(m).padStart(2, '0');
+        const record = game.records(mode);
+        const { y, m, dow } = ym();
+        const mm = String(m).padStart(2, '0');
         title.textContent = `${y}년 ${m}월`;
-        next.disabled = st.offset >= 0;
-        prev.disabled = `${y}-${mm}` <= cfg.firstDate.slice(0, 7);
+        next.disabled = offset >= 0;
+        prev.disabled = `${y}-${mm}` <= game.firstDate.slice(0, 7);
 
-        cal.textContent = '';
+        grid.textContent = '';
         const head = el('div', 'cal-grid cal-head');
         CAL_WEEKDAYS.forEach((w) => head.append(el('span', 'cal-dow', w)));
-        const grid = el('div', 'cal-grid');
-        for (let k = 0; k < first.getUTCDay(); k++) grid.append(el('span', 'cal-cell cal-cell--blank'));
+        const cells = el('div', 'cal-grid');
+        for (let k = 0; k < dow; k++) cells.append(el('span', 'cal-cell cal-cell--blank'));
         const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
         for (let d = 1; d <= days; d++) {
           const date = `${y}-${mm}-${String(d).padStart(2, '0')}`;
           const cell = el('span', 'cal-cell');
           cell.append(el('span', 'cal-day', d));
           if (date === today) cell.classList.add('cal-cell--today');
-          if (date === st.selected) cell.classList.add('cal-cell--picked');
+          if (pick && date === selected) cell.classList.add('cal-cell--picked');
           const r = record(date);
           if (r) {
             cell.classList.add('cal-cell--filled');
@@ -627,19 +741,166 @@
             cell.append(el('span', 'cal-val', r.val));
           } else if (date > today) cell.classList.add('cal-cell--future');
           else cell.classList.add('cal-cell--miss');
-          if (date >= cfg.firstDate && date <= maxDate) {
+          if (pick && date >= game.firstDate && date <= maxDate) {
             cell.classList.add('cal-cell--pickable');
-            cell.addEventListener('click', () => { st.selected = date; render(); });
+            cell.addEventListener('click', () => onPick(date));
           }
-          grid.append(cell);
+          cells.append(cell);
         }
-        cal.append(head, grid);
+        grid.append(head, cells);
+      }
+      return { nav, grid, draw, ym, reset: () => { offset = 0; } };
+    }
+
+    // ── 지난 퍼즐 — 날짜를 고르고 플레이하면 게임이 ?archive=날짜&mode=모드 로 바로 시작 ──
+    function archiveView(game) {
+      const st = { mode: game.modes[0][0], selected: null };
+      const view = el('div', 'landing-stack sub-stack archive-stack');
+      const note = el('p', 'archive-note', '연습용 — 통계·연승에 반영되지 않습니다.');
+      const tabs = modeTabs(game, (mode) => { st.mode = mode; render(); }); // 달·고른 날짜는 유지
+      const cal = monthCalendar(game, { pick: true, onPick: (date) => { st.selected = date; render(); } });
+      const error = el('p', 'archive-error');
+      const play = button('landing-btn primary-btn archive-play', '플레이');
+      play.addEventListener('click', () => {
+        if (st.selected) location.href = `${game.dir}/?archive=${st.selected}&mode=${st.mode}`;
+      });
+      view.append(note, tabs.wrap, cal.nav, cal.grid, error, play);
+
+      function render() {
+        tabs.set(st.mode);
+        error.textContent = todayStr() <= game.firstDate ? '아직 지난 퍼즐이 없어요 — 내일부터 열려요.' : '';
+        play.disabled = !st.selected;
+        cal.draw({ mode: st.mode, selected: st.selected });
+      }
+      return {
+        view, render,
+        open() { st.mode = game.modes[0][0]; st.selected = null; cal.reset(); render(); }, // 들어올 때마다 스탠다드부터
+      };
+    }
+
+    // ── 자유 연습 모드 고르기 — 고르면 게임이 ?free=모드 로 바로 시작 ──
+    function freeView(game) {
+      const view = el('div', 'landing-stack');
+      const cards = el('div', 'daily-cards');
+      for (const [mode, name, desc] of game.free) {
+        const a = link(`${game.dir}/?free=${mode}`, 'daily-card');
+        a.append(el('span', 'daily-card-name', name), el('span', 'daily-card-desc', desc));
+        cards.append(a);
+      }
+      view.append(el('h3', 'sub-title', '자유 연습 모드'), cards);
+      return { view, render() {}, open() {} };
+    }
+
+    // ── 통계 — 숫자·분포·공유 문구는 게임의 src/hubApi.js(게임 통계창과 같은 계산)로 ──
+    const apiCache = new Map();
+    const loadApi = (game) => {
+      if (!apiCache.has(game.slug)) apiCache.set(game.slug, import(`./${game.dir}/src/hubApi.js`));
+      return apiCache.get(game.slug);
+    };
+    function statsView(game) {
+      const st = { mode: game.modes[0][0], pane: 'cal' };
+      let timer = 0;
+      const view = el('div', 'landing-stack sub-stack stats-stack');
+      const tabs = modeTabs(game, (mode) => { st.mode = mode; render(); });
+
+      const numbers = el('div', 'stats-numbers');
+      const num = {};
+      for (const [key, label] of [['played', '게임'], ['winRate', '승률(%)'], ['curStreak', '현재 연승'], ['maxStreak', '최고 연승']]) {
+        const box = el('div', 'stats-num');
+        num[key] = el('strong', null, '0');
+        box.append(num[key], el('span', null, label));
+        numbers.append(box);
       }
 
+      // 달력 / 분포 — 둘 다 펼치면 카드가 너무 길어져서 한 번에 하나씩
+      const seg = el('div', 'stats-seg');
+      const segBtns = { cal: button(null, '달력'), dist: button(null, '분포') };
+      Object.entries(segBtns).forEach(([pane, b]) => { b.addEventListener('click', () => { st.pane = pane; render(); }); seg.append(b); });
+
+      const calPane = el('div', 'stats-pane');
+      const cal = monthCalendar(game);
+      const calShareRow = el('div', 'cal-share-row');
+      const calShare = button('mini-share', '📋 공유');
+      calShare.setAttribute('aria-label', '달력 공유');
+      const calNote = el('span', 'share-note');
+      calShareRow.append(calShare, calNote);
+      cal.nav.append(calShareRow); // 달 이동 줄 오른쪽 — 한 줄 아끼기
+      calPane.append(cal.nav, cal.grid);
+
+      const distPane = el('div', 'stats-pane');
+      const distTitle = el('h3', 'dist-title');
+      const distRows = el('div', 'stats-pane');
+      distPane.append(distTitle, distRows);
+
+      const footer = el('div', 'stats-footer');
+      const next = el('div', 'stats-next');
+      const countdown = el('strong', null, '--:--:--');
+      next.append(el('span', null, '다음 데일리까지'), countdown);
+      const share = button('landing-btn primary-btn stats-share', '공유');
+      footer.append(next, share);
+      const shareNote = el('p', 'archive-error share-note');
+
+      view.append(tabs.wrap, numbers, seg, calPane, distPane, footer, shareNote);
+
+      calShare.addEventListener('click', async () => {
+        const api = await loadApi(game);
+        const { y, m } = cal.ym();
+        flash(calNote, (await copyText(api.calendarShareText(st.mode, y, m))) ? '복사했어요!' : '복사 실패');
+      });
+      share.addEventListener('click', async () => {
+        try {
+          const api = await loadApi(game);
+          const text = await api.todayShareText(st.mode);
+          if (!text) { flash(shareNote, '오늘 퍼즐을 먼저 풀어주세요.'); return; }
+          flash(shareNote, (await copyText(text)) ? '클립보드에 복사했어요!' : '복사 실패');
+        } catch (err) {
+          console.error(err);
+          flash(shareNote, '공유 문구를 만들지 못했어요.');
+        }
+      });
+
+      async function render() {
+        tabs.set(st.mode);
+        Object.entries(segBtns).forEach(([pane, b]) => b.classList.toggle('active', pane === st.pane));
+        calPane.hidden = st.pane !== 'cal';
+        distPane.hidden = st.pane !== 'dist';
+        cal.draw({ mode: st.mode });
+        let s;
+        try { s = (await loadApi(game)).stats(st.mode); } catch (err) {
+          console.error(err);
+          shareNote.textContent = '통계를 불러오지 못했어요.';
+          return;
+        }
+        num.played.textContent = s.played;
+        num.winRate.textContent = s.winRate;
+        num.curStreak.textContent = s.curStreak;
+        num.maxStreak.textContent = s.maxStreak;
+        distTitle.textContent = s.distTitle;
+        const max = Math.max(1, ...s.dist.map((d) => d.count));
+        distRows.textContent = '';
+        for (const d of s.dist) {
+          const row = el('div', 'dist-row');
+          const track = el('span', 'dist-track');
+          const fill = el('span', 'dist-fill' + (d.fail ? ' fail' : ''));
+          fill.style.width = `${(d.count / max) * 100}%`;
+          track.append(fill);
+          row.append(el('span', 'dist-label', d.label), track, el('span', 'dist-count', d.count));
+          distRows.append(row);
+        }
+      }
       return {
-        view,
-        render,
-        open() { st.mode = cfg.modes[0][0]; st.selected = null; st.offset = 0; render(); }, // 들어올 때마다 스탠다드부터
+        view, render,
+        open() {
+          st.mode = game.modes[0][0];
+          st.pane = 'cal';
+          cal.reset();
+          render();
+          const tick = () => { countdown.textContent = untilNextReset(); };
+          tick();
+          clearInterval(timer);
+          timer = setInterval(tick, 1000);
+        },
+        close() { clearInterval(timer); },
       };
     }
 
@@ -648,18 +909,14 @@
     const dotsEl = document.getElementById('hub-dots');
     const prevBtn = document.getElementById('hub-prev');
     const nextBtn = document.getElementById('hub-next');
-    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-    const link = (href, cls, text) => { const a = el('a', cls, text); a.href = href; return a; };
-    const openUrl = (game, id) => `${game.dir}/?open=${id}`;
-    const cardViews = [];
+    const cardViews = []; // 카드마다 { show(name), current() }
 
     GAMES.forEach((game, i) => {
       const slide = el('section', 'hub-slide');
       slide.id = game.slug;
       slide.setAttribute('aria-label', game.title);
       const card = el('div', 'landing-card');
-      const back = el('button', 'hub-back', '‹ 뒤로');
-      back.type = 'button';
+      const back = button('hub-back', '‹ 뒤로');
       back.hidden = true;
 
       const h1 = el('h1', 'landing-title');
@@ -669,49 +926,59 @@
       const date = el('p', 'landing-date');
       date.dataset.date = '';
 
-      const stack = el('div', 'landing-stack');
+      // 메인
+      const main = el('div', 'landing-stack');
       const cards = el('div', 'daily-cards');
-      for (const daily of game.dailies) {
+      game.dailies.forEach((daily, di) => {
         const a = link(openUrl(game, daily.open), 'daily-card');
         const badge = el('span', 'daily-card-status');
-        badge.dataset.statusFor = `${i}:${game.dailies.indexOf(daily)}`;
+        badge.dataset.statusFor = `${i}:${di}`;
         a.append(el('span', 'daily-card-name', daily.name), el('span', 'daily-card-desc', daily.desc), badge);
         cards.append(a);
-      }
+      });
       const row = el('div', 'landing-row');
-      const archiveBtn = el('button', 'landing-btn', '지난 퍼즐');
-      archiveBtn.type = 'button';
-      row.append(link(openUrl(game, 'btn-free-play'), 'landing-btn', '자유 연습'), archiveBtn);
+      // 자유 연습: 모드가 있는 게임은 카드 안에서 고르고, 없는 게임(스도쿠)은 바로 게임으로
+      const freeBtn = game.free ? button('landing-btn', '자유 연습') : link(openUrl(game, 'btn-free-play'), 'landing-btn', '자유 연습');
+      const archiveBtn = button('landing-btn', '지난 퍼즐');
+      row.append(freeBtn, archiveBtn);
       const mini = el('div', 'landing-mini-actions');
-      const dark = el('button', 'landing-mini-btn', '다크 모드');
-      dark.type = 'button';
+      const statsBtn = button('landing-mini-btn', '통계');
+      const dark = button('landing-mini-btn', '다크 모드');
       dark.addEventListener('click', toggleDark);
-      mini.append(link(openUrl(game, 'btn-landing-stats'), 'landing-mini-btn', '통계'), dark);
-      stack.append(cards, row, mini);
+      mini.append(statsBtn, dark);
+      main.append(cards, row, mini);
+
+      // 하위 화면 — 같은 카드 안에서 메인과 바꿔 보여 준다 (카드 가로 폭 그대로)
+      const subs = { archive: archiveView(game), stats: statsView(game) };
+      if (game.free) subs.free = freeView(game);
+      Object.values(subs).forEach((s) => { s.view.hidden = true; });
+      let currentView = 'main';
+      const show = (name) => {
+        if (currentView !== 'main') subs[currentView].close?.();
+        currentView = name;
+        if (name !== 'main') subs[name].open();
+        main.hidden = name !== 'main';
+        Object.entries(subs).forEach(([key, s]) => { s.view.hidden = key !== name; });
+        back.hidden = name === 'main';
+        card.classList.toggle('is-sub', name !== 'main');
+      };
+      archiveBtn.addEventListener('click', () => show('archive'));
+      statsBtn.addEventListener('click', () => show('stats'));
+      if (game.free) freeBtn.addEventListener('click', () => show('free'));
+      back.addEventListener('click', () => show('main'));
+      cardViews.push({ show, current: () => currentView, render: () => { if (currentView !== 'main') subs[currentView].render(); } });
 
       const footer = el('p', 'landing-footer');
-      footer.append(link('https://github.com/nuclyee72/ProjectDaily', null, 'nuclyee'));
-      footer.lastChild.target = '_blank';
-      footer.lastChild.rel = 'noopener';
+      const repo = link('https://github.com/nuclyee72/ProjectDaily', null, 'nuclyee');
+      repo.target = '_blank';
+      repo.rel = 'noopener';
+      footer.append(repo);
 
-      const archive = buildArchive(game);
-      const showArchive = (on) => {
-        if (on) archive.open();
-        stack.hidden = on;
-        archive.view.hidden = !on;
-        back.hidden = !on;
-        card.classList.toggle('is-archive', on);
-      };
-      archiveBtn.addEventListener('click', () => showArchive(true));
-      back.addEventListener('click', () => showArchive(false));
-      cardViews.push({ archive, showArchive, isArchive: () => !archive.view.hidden });
-
-      card.append(back, h1, date, stack, archive.view, footer);
+      card.append(back, h1, date, main, ...Object.values(subs).map((s) => s.view), footer);
       slide.append(card);
       track.append(slide);
 
-      const dot = el('button', 'hub-dot');
-      dot.type = 'button';
+      const dot = button('hub-dot');
       dot.setAttribute('aria-label', game.title);
       dot.addEventListener('click', () => goTo(i));
       dotsEl.append(dot);
@@ -726,7 +993,7 @@
         badge.textContent = text;
         badge.dataset.status = status;
       });
-      cardViews.forEach((v) => { if (v.isArchive()) v.archive.render(); });
+      cardViews.forEach((v) => v.render()); // 열려 있는 하위 화면(달력·통계)도 다시
     }
 
     // ── 슬라이드 이동 ──
@@ -754,7 +1021,7 @@
     prevBtn.addEventListener('click', () => goTo(current - 1));
     nextBtn.addEventListener('click', () => goTo(current + 1));
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && cardViews[current].isArchive()) cardViews[current].showArchive(false);
+      if (e.key === 'Escape' && cardViews[current].current() !== 'main') cardViews[current].show('main');
       else if (e.key === 'ArrowLeft') goTo(current - 1);
       else if (e.key === 'ArrowRight') goTo(current + 1);
     });
