@@ -37,15 +37,9 @@ jobs:
           git submodule update --remote
           git submodule foreach 'echo "$name: $(git log -1 --format="%h %s")"'
 
-      # 허브는 사이트 루트, 게임은 각자 폴더 — /ProjectDaily/DailySudoku/ 등
+      # 허브는 사이트 루트, 게임은 각자 폴더 — /ProjectDaily/DailySudoku/ 등 (파일 목록은 스크립트 안에)
       - name: Assemble site
-        run: |
-          mkdir _site
-          cp -r index.html .nojekyll icon.svg manifest.webmanifest _site/
-          mkdir _site/DailySudoku _site/DailyTrilateral _site/DailyWordship
-          (cd DailySudoku     && cp -r index.html style.css icon.svg manifest.webmanifest src daily ../_site/DailySudoku/)
-          (cd DailyTrilateral && cp -r index.html style.css icon.svg manifest.webmanifest apple-touch-icon.png icon-192.png icon-512.png src daily ../_site/DailyTrilateral/)
-          (cd DailyWordship   && cp -r index.html style.css icon.svg manifest.webmanifest src daily ../_site/DailyWordship/)
+        run: node scripts/assemble-site.mjs _site
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

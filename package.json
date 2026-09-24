@@ -1,0 +1,12 @@
+{
+  "name": "project-daily",
+  "private": true,
+  "description": "데일리 퍼즐 허브 — 세 게임(서브모듈)을 한 사이트(/ProjectDaily/)로",
+  "scripts": {
+    "build": "node scripts/assemble-site.mjs _site",
+    "test": "node tests/run-all.cjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}

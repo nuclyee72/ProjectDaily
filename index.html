@@ -309,6 +309,7 @@
     .cal-cell--blank    { background: transparent; }
     .cal-cell--miss     { background: rgba(var(--text-given-rgb), 0.06); }
     .cal-cell--future   { opacity: 0.3; }
+    .cal-cell--locked   { opacity: 0.3; } /* 첫 퍼즐 이전 — 퍼즐 자체가 없는 날 */
     .cal-cell--today    { box-shadow: inset 0 0 0 2px hsl(145 60% 28%); }
     .cal-cell--solved   { background: var(--text-input); }
     .cal-cell--fail     { background: var(--conflict); }
@@ -380,6 +381,9 @@
     }
     .mini-share:hover { background: var(--surface-1-hover); color: var(--text-given); }
     .share-note { font-size: 11px; font-weight: 600; color: var(--text-input); }
+    .share-note[data-tone="info"]  { color: rgba(var(--text-given-rgb), 0.6); }
+    .share-note[data-tone="error"] { color: var(--conflict); }
+    .stats-note { margin: 0; font-size: 12px; }
     .cal-share-row .share-note { position: absolute; right: 0; top: calc(100% + 2px); white-space: nowrap; }
     .share-note:empty { display: none; }
     .dist-title { margin: 0 0 2px; font-size: 12px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.7); text-align: left; }
@@ -670,8 +674,10 @@
     const link = (href, cls, text) => { const a = el('a', cls, text); a.href = href; return a; };
     const button = (cls, text) => { const b = el('button', cls, text); b.type = 'button'; return b; };
     const openUrl = (game, id) => `${game.dir}/?open=${id}`;
-    function flash(noteEl, text) {
+    // tone: 'ok'(초록) · 'info'(회색) · 'error'(빨강)
+    function flash(noteEl, text, tone = 'ok') {
       noteEl.textContent = text;
+      noteEl.dataset.tone = tone;
       clearTimeout(noteEl._t);
       noteEl._t = setTimeout(() => { noteEl.textContent = ''; }, 2600);
     }
@@ -740,6 +746,7 @@
             if (r.bg) cell.style.background = r.bg;
             cell.append(el('span', 'cal-val', r.val));
           } else if (date > today) cell.classList.add('cal-cell--future');
+          else if (date < game.firstDate) cell.classList.add('cal-cell--locked');
           else cell.classList.add('cal-cell--miss');
           if (pick && date >= game.firstDate && date <= maxDate) {
             cell.classList.add('cal-cell--pickable');
@@ -841,24 +848,26 @@
       next.append(el('span', null, '다음 데일리까지'), countdown);
       const share = button('landing-btn primary-btn stats-share', '공유');
       footer.append(next, share);
-      const shareNote = el('p', 'archive-error share-note');
+      const shareNote = el('p', 'share-note stats-note');
 
       view.append(tabs.wrap, numbers, seg, calPane, distPane, footer, shareNote);
 
       calShare.addEventListener('click', async () => {
         const api = await loadApi(game);
         const { y, m } = cal.ym();
-        flash(calNote, (await copyText(api.calendarShareText(st.mode, y, m))) ? '복사했어요!' : '복사 실패');
+        const ok = await copyText(api.calendarShareText(st.mode, y, m));
+        flash(calNote, ok ? '복사했어요!' : '복사 실패', ok ? 'ok' : 'error');
       });
       share.addEventListener('click', async () => {
         try {
           const api = await loadApi(game);
           const text = await api.todayShareText(st.mode);
-          if (!text) { flash(shareNote, '오늘 퍼즐을 먼저 풀어주세요.'); return; }
-          flash(shareNote, (await copyText(text)) ? '클립보드에 복사했어요!' : '복사 실패');
+          if (!text) { flash(shareNote, '오늘 퍼즐을 먼저 풀어주세요.', 'info'); return; }
+          const ok = await copyText(text);
+          flash(shareNote, ok ? '클립보드에 복사했어요!' : '복사 실패', ok ? 'ok' : 'error');
         } catch (err) {
           console.error(err);
-          flash(shareNote, '공유 문구를 만들지 못했어요.');
+          flash(shareNote, '공유 문구를 만들지 못했어요.', 'error');
         }
       });
 
@@ -872,6 +881,7 @@
         try { s = (await loadApi(game)).stats(st.mode); } catch (err) {
           console.error(err);
           shareNote.textContent = '통계를 불러오지 못했어요.';
+          shareNote.dataset.tone = 'error';
           return;
         }
         num.played.textContent = s.played;
@@ -1041,6 +1051,11 @@
     refreshStatus();
     const start = GAMES.findIndex((g) => '#' + g.slug === location.hash);
     goTo(start < 0 ? 0 : start, false);
+    // 데일리 리셋(아침 6시) 순간에도 — 허브를 켜 둔 채 넘어가면 날짜·상태가 전날로 남지 않게
+    (function scheduleResetRefresh() {
+      const ms = 86400000 - ((Date.now() + DAY_OFFSET_MS) % 86400000);
+      setTimeout(() => { refreshStatus(); scheduleResetRefresh(); }, ms + 1000);
+    })();
     // 뒤로 가기(bfcache)로 돌아오거나 탭을 다시 볼 때 — 게임에서 바뀐 상태·날짜 반영
     window.addEventListener('pageshow', refreshStatus);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshStatus(); });
