@@ -97,10 +97,10 @@
     }
 
     /* ── 게임 카드 (= 각 게임의 랜딩 카드) ── */
+    /* 카드 안은 스크롤하지 않는다 — 화면이 낮으면 아래 @media (max-height) 에서 여백·크기를 줄여 한 화면에 맞춘다 */
     .landing-card {
       width: min(340px, calc(100vw - 32px));
-      max-height: 100%;
-      overflow-y: auto;
+      flex-shrink: 0;
       padding: 48px 36px 40px;
       border-radius: 28px;
       background: rgba(var(--glass-rgb), 0.75);
@@ -267,6 +267,47 @@
     .hub-arrow-next { right: max(16px, calc(50% - 250px)); }
     @media (hover: hover) and (pointer: fine) and (min-width: 520px) {
       .hub-arrow { display: block; }
+    }
+
+    /* ── 낮은 화면: 카드가 스크롤 없이 들어가도록 여백·크기를 줄인다 ── */
+    @media (max-height: 680px) {
+      .hub-slide {
+        padding-top: calc(10px + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(44px + env(safe-area-inset-bottom, 0px));
+      }
+      .hub-dots { bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+      .landing-card { padding: 30px 28px 24px; border-radius: 24px; }
+      .landing-title { margin-bottom: 24px; font-size: 24px; }
+      .landing-date { margin: -16px 0 18px; }
+      .landing-stack { gap: 12px; }
+      .daily-cards { gap: 10px; }
+      .daily-card { padding: 12px 16px; }
+      .landing-btn { height: 48px; }
+      .landing-mini-actions { margin-top: 0; }
+      .landing-footer { margin-top: 14px; }
+    }
+    @media (max-height: 560px) {
+      .hub-slide {
+        padding-top: calc(8px + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(38px + env(safe-area-inset-bottom, 0px));
+      }
+      .hub-dots { bottom: calc(4px + env(safe-area-inset-bottom, 0px)); }
+      .landing-card { padding: 24px 24px 18px; border-radius: 20px; }
+      .landing-title { margin-bottom: 18px; font-size: 22px; }
+      .landing-date { margin: -8px 0 12px; font-size: 12px; }
+      .landing-stack { gap: 8px; }
+      .daily-cards { gap: 8px; }
+      .daily-card { padding: 10px 14px; gap: 1px; }
+      .daily-card-name { font-size: 15px; }
+      .daily-card-desc { font-size: 11px; }
+      .daily-card-status { margin-top: 3px; padding: 2px 8px; font-size: 11px; }
+      .landing-btn { height: 40px; font-size: 15px; border-radius: 12px; }
+      .landing-mini-btn { height: 30px; }
+      .landing-footer { display: none; }
+    }
+    /* 그래도 넘치는 극단적인 경우(가로 모드 등)만 카드가 아닌 화면 전체가 세로로 움직인다 */
+    @media (max-height: 420px) {
+      .hub-slide { align-items: safe center; overflow-y: auto; }
     }
   </style>
 </head>
