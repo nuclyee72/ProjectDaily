@@ -794,7 +794,10 @@
     // ── 통계 — 숫자·분포·공유 문구는 게임의 src/hubApi.js(게임 통계창과 같은 계산)로 ──
     const apiCache = new Map();
     const loadApi = (game) => {
-      if (!apiCache.has(game.slug)) apiCache.set(game.slug, import(`./${game.dir}/src/hubApi.js`));
+      // 실패(배포 중·일시적 네트워크 문제)는 기억하지 않고 다음에 다시 시도
+      if (!apiCache.has(game.slug)) {
+        apiCache.set(game.slug, import(`./${game.dir}/src/hubApi.js`).catch((err) => { apiCache.delete(game.slug); throw err; }));
+      }
       return apiCache.get(game.slug);
     };
     function statsView(game) {
