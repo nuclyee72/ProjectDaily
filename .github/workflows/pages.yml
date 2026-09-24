@@ -1,0 +1,55 @@
+name: Deploy Pages
+
+# 허브(/ProjectDaily/) + 세 게임(서브모듈)을 한 사이트로 묶어 배포한다.
+# 게임 레포는 각자 매일 퍼즐을 커밋하므로, 배포할 때마다 서브모듈을 각 레포 main 최신으로 받아 온다
+# (여기 기록된 서브모듈 커밋이 오래돼도 사이트는 항상 최신).
+on:
+  push:
+    branches: [main]
+  # 게임 레포의 퍼즐 커밋·코드 변경을 주기적으로 반영 (퍼즐은 3일치를 미리 만들어 두므로 여유 있음)
+  schedule:
+    - cron: '17 */6 * * *'
+  # 게임 코드를 고친 뒤 바로 반영하고 싶을 때: Actions 탭에서 수동 실행
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Update games to latest main
+        run: |
+          git submodule update --remote
+          git submodule foreach 'echo "$name: $(git log -1 --format="%h %s")"'
+
+      # 허브는 사이트 루트, 게임은 각자 폴더 — /ProjectDaily/DailySudoku/ 등
+      - name: Assemble site
+        run: |
+          mkdir _site
+          cp -r index.html .nojekyll icon.svg manifest.webmanifest _site/
+          mkdir _site/DailySudoku _site/DailyTrilateral _site/DailyWordship
+          (cd DailySudoku     && cp -r index.html style.css icon.svg manifest.webmanifest src daily ../_site/DailySudoku/)
+          (cd DailyTrilateral && cp -r index.html style.css icon.svg manifest.webmanifest apple-touch-icon.png icon-192.png icon-512.png src daily ../_site/DailyTrilateral/)
+          (cd DailyWordship   && cp -r index.html style.css icon.svg manifest.webmanifest src daily ../_site/DailyWordship/)
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

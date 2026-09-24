@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>데일리 퍼즐</title>
+  <meta name="theme-color" content="#2f9e60"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="데일리 퍼즐"/>
+  <link rel="icon" href="icon.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="icon.svg"/>
+  <link rel="manifest" href="manifest.webmanifest"/>
+  <script>
+    // body가 그려지기 전에 먼저 적용해서 라이트 테마가 잠깐 번쩍이는 걸 막는다
+    // (허브 설정이 없으면 게임 쪽 설정 중 하나라도 켜져 있으면 다크)
+    try {
+      const hub = localStorage.getItem('daily-dark-mode');
+      const on = hub != null ? hub === '1'
+        : ['sudoku-dark-mode', 'trilateral-dark-mode', 'wordship-dark-mode'].some((k) => localStorage.getItem(k) === '1');
+      if (on) document.documentElement.setAttribute('data-theme', 'dark');
+    } catch {}
+  </script>
+  <style>
+    /* 색·카드 모양은 세 게임의 랜딩 화면(style.css)과 같게 맞춘다 */
+    :root {
+      --conflict:            #e53e3e;
+      --text-given:          #232733;
+      --text-given-rgb:      35, 39, 51;
+      --text-input:          #2f9e60;
+      --text-sel:            #1e6b41;
+      --cell-selected:       #d3ecdc;
+      --bg-page:             #ffffff;
+      --landing-gradient:    linear-gradient(160deg, #eef4f0, #ffffff 60%);
+      --glass-rgb:           255, 255, 255;
+      --surface-solid:       #ffffff;
+      --surface-solid-hover: #f5f6f8;
+      --surface-1:           #f0f1f4;
+      --surface-1-hover:     #e6e7ec;
+      --surface-danger:      #fff1f1;
+      --playing-bg:          #fff3d6;
+      --playing-text:        #a9791d;
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --conflict:            #f0655f;
+      --text-given:          #e4e6ea;
+      --text-given-rgb:      228, 230, 234;
+      --text-input:          #4cc47f;
+      --text-sel:            #86e6b3;
+      --cell-selected:       #234534;
+      --bg-page:             #14161c;
+      --landing-gradient:    linear-gradient(160deg, #182420, #14161c 60%);
+      --glass-rgb:           24, 27, 34;
+      --surface-solid:       #1c1f27;
+      --surface-solid-hover: #262a35;
+      --surface-1:           #262a35;
+      --surface-1-hover:     #303543;
+      --surface-danger:      #3a2226;
+      --playing-bg:          #3a3320;
+      --playing-text:        #e0b24c;
+    }
+
+    * { box-sizing: border-box; scrollbar-width: none; -ms-overflow-style: none; }
+    *::-webkit-scrollbar { width: 0; height: 0; display: none; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg-page);
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body { background: var(--landing-gradient); }
+
+    /* ── 가로 스와이프 트랙 ── */
+    .hub-track {
+      display: flex;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+    }
+    .hub-slide {
+      flex: 0 0 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+      padding: 16px 16px 56px;
+      padding-top: calc(16px + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* ── 게임 카드 (= 각 게임의 랜딩 카드) ── */
+    .landing-card {
+      width: min(340px, calc(100vw - 32px));
+      max-height: 100%;
+      overflow-y: auto;
+      padding: 48px 36px 40px;
+      border-radius: 28px;
+      background: rgba(var(--glass-rgb), 0.75);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(var(--glass-rgb), 0.6);
+      box-shadow: 0 24px 60px rgba(20, 24, 40, 0.18);
+      text-align: center;
+    }
+    .landing-title {
+      margin: 0 0 32px;
+      font-family: 'Outfit', 'Inter', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-given);
+    }
+    .landing-title-icon { font-size: 0.9em; margin-right: 2px; }
+    .landing-date {
+      margin: -20px 0 24px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: rgba(var(--text-given-rgb), 0.55);
+    }
+    .landing-stack { display: flex; flex-direction: column; gap: 14px; }
+
+    .daily-cards { display: flex; flex-direction: column; gap: 12px; }
+    .daily-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+      padding: 16px 18px;
+      border: 1px solid rgba(var(--glass-rgb), 0.6);
+      border-radius: 16px;
+      background: var(--surface-solid);
+      text-align: left;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(20, 24, 40, 0.08);
+      transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .daily-card:hover { background: var(--surface-solid-hover); box-shadow: 0 6px 16px rgba(20, 24, 40, 0.16); }
+    .daily-card:active { transform: scale(0.98); }
+    .daily-card-name {
+      font-family: 'Outfit', 'Inter', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-given);
+    }
+    .daily-card-desc { font-size: 12px; color: rgba(var(--text-given-rgb), 0.55); }
+    .daily-card-status {
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--surface-1);
+      color: rgba(var(--text-given-rgb), 0.6);
+    }
+    .daily-card-status[data-status="solved"]  { background: var(--cell-selected); color: var(--text-sel); }
+    .daily-card-status[data-status="timeout"] { background: var(--surface-danger); color: var(--conflict); }
+    .daily-card-status[data-status="playing"] { background: var(--playing-bg); color: var(--playing-text); }
+
+    .landing-row { display: flex; gap: 10px; }
+    .landing-btn {
+      flex: 1;
+      min-width: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: var(--surface-1);
+      color: var(--text-given);
+      font-family: 'Outfit', 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(20, 24, 40, 0.08);
+      transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .landing-btn:hover { background: var(--surface-1-hover); box-shadow: 0 4px 10px rgba(20, 24, 40, 0.14); }
+    .landing-btn:active { transform: scale(0.97); }
+
+    .landing-mini-actions { display: flex; gap: 6px; margin-top: 6px; }
+    .landing-mini-btn {
+      flex: 1;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: rgba(var(--text-given-rgb), 0.6);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .landing-mini-btn:hover { background: var(--surface-1); color: var(--text-given); }
+
+    .landing-footer {
+      margin: 28px 0 0;
+      font-size: 11px;
+      color: rgba(var(--text-given-rgb), 0.4);
+    }
+    .landing-footer a { color: inherit; text-decoration: none; }
+    .landing-footer a:hover { color: rgba(var(--text-given-rgb), 0.7); text-decoration: underline; }
+
+    /* ── 하단 점 (몇 번째 게임인지) ── */
+    .hub-dots {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+    }
+    .hub-dot {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hub-dot::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(var(--text-given-rgb), 0.22);
+      transition: width 0.2s ease, background 0.2s ease;
+    }
+    .hub-dot[aria-current="true"]::before { width: 22px; background: var(--text-input); }
+
+    /* ── 좌우 화살표 — 마우스 환경에서만 ── */
+    .hub-arrow {
+      position: fixed;
+      top: 50%;
+      width: 44px;
+      height: 44px;
+      margin-top: -22px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(var(--glass-rgb), 0.75);
+      color: rgba(var(--text-given-rgb), 0.7);
+      box-shadow: 0 4px 14px rgba(20, 24, 40, 0.14);
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      display: none;
+    }
+    .hub-arrow:hover { color: var(--text-given); }
+    .hub-arrow:disabled { opacity: 0; pointer-events: none; }
+    .hub-arrow-prev { left: max(16px, calc(50% - 250px)); }
+    .hub-arrow-next { right: max(16px, calc(50% - 250px)); }
+    @media (hover: hover) and (pointer: fine) and (min-width: 520px) {
+      .hub-arrow { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <main id="hub-track" class="hub-track" aria-label="게임 목록"></main>
+  <button id="hub-prev" class="hub-arrow hub-arrow-prev" type="button" aria-label="이전 게임">‹</button>
+  <button id="hub-next" class="hub-arrow hub-arrow-next" type="button" aria-label="다음 게임">›</button>
+  <nav id="hub-dots" class="hub-dots" aria-label="게임 선택"></nav>
+
+  <script>
+    // ── 게임 목록 — 버튼 id는 각 게임 랜딩의 id 그대로 (게임 쪽 src/hub.js가 ?open= 으로 받아 눌러 준다) ──
+    const GAMES = [
+      {
+        slug: 'sudoku', dir: 'DailySudoku', icon: '📝', title: '데일리 스도쿠',
+        dailies: [
+          { open: 'btn-daily-standard', name: '스탠다드', desc: '겹친 2판 · 요소 없음', status: (d) => sudokuStatus(d, 'standard') },
+          { open: 'btn-daily-extended', name: '익스텐디드', desc: '겹친 2판 · 요소 2개', status: (d) => sudokuStatus(d, 'extended') },
+        ],
+      },
+      {
+        slug: 'trilateral', dir: 'DailyTrilateral', icon: '🔺', title: '데일리 삼각관계',
+        dailies: [
+          { open: 'btn-daily-play', name: '스탠다드', desc: '3단 · 추측 4번',
+            status: (d) => guessStatus(d, 'trilateral:stats', 'trilateral:progress:' + d) },
+          { open: 'btn-daily-play-extended', name: '익스텐디드', desc: '3단 · 전체 단어 · 추측 5번',
+            status: (d) => guessStatus(d, 'trilateral:stats:extended', 'trilateral:progress:extended:' + d) },
+        ],
+      },
+      {
+        slug: 'wordship', dir: 'DailyWordship', icon: '🚢', title: '데일리 워드십',
+        dailies: [
+          { open: 'btn-daily-play', name: '스탠다드', desc: '8×8 · 함선 6척 · 추측 30번',
+            status: (d) => guessStatus(d, 'wordship:stats', 'wordship:progress:' + d, 30) },
+          { open: 'btn-daily-play-idiom', name: '사자성어', desc: '8×8 · 사자성어 함선 5척 · 추측 20번',
+            status: (d) => guessStatus(d, 'wordship:stats:idiom', 'wordship:progress:idiom:' + d, 20) },
+        ],
+      },
+    ];
+    const DARK_KEYS = ['daily-dark-mode', 'sudoku-dark-mode', 'trilateral-dark-mode', 'wordship-dark-mode'];
+
+    // ── 날짜 — 게임들과 같은 규칙: 데일리 경계 = KST 06:00 = UTC+3 자정 ──
+    function todayStr() {
+      const d = new Date(Date.now() + 3 * 60 * 60 * 1000);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function readJSON(key) {
+      try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
+    }
+
+    // ── 오늘 상태 배지 — 각 게임 랜딩의 표시 규칙을 그대로 옮김 ──
+    function fmtMMSS(ms) {
+      const t = Math.max(0, Math.floor(ms / 1000));
+      return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
+    }
+    function sudokuStatus(date, variant) {
+      const p = readJSON(`dsudoku:progress:${date}:${variant}`);
+      if (!p) return ['플레이 전', 'new'];
+      if (p.status === 'solved') return ['✅ ' + fmtMMSS(p.elapsedMs), 'solved'];
+      if (p.status === 'timeout' || p.status === 'gaveup') return [p.pct != null ? `❌ ${p.pct}%` : '❌ 실패', 'timeout'];
+      if (p.status === 'playing' && (p.activeMs ?? 0) >= 15 * 60 * 1000) return ['❌ 시간 초과', 'timeout'];
+      return ['플레이 중', 'playing'];
+    }
+    function guessStatus(date, statsKey, progressKey, maxGuesses) {
+      const r = readJSON(statsKey)?.results?.[date];
+      if (r?.status === 'solved') return ['성공', 'solved'];
+      if (r?.status === 'failed') return ['실패', 'timeout'];
+      const p = readJSON(progressKey);
+      if (maxGuesses) {
+        if (p?.guesses?.length) return [`진행 중 · ${p.guesses.length}/${maxGuesses}`, 'playing'];
+      } else if (p?.status === 'playing') return ['진행 중', 'playing'];
+      return ['플레이 전', 'new'];
+    }
+
+    // ── 그리기 ──
+    const track = document.getElementById('hub-track');
+    const dotsEl = document.getElementById('hub-dots');
+    const prevBtn = document.getElementById('hub-prev');
+    const nextBtn = document.getElementById('hub-next');
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    const link = (href, cls, text) => { const a = el('a', cls, text); a.href = href; return a; };
+    const openUrl = (game, id) => `${game.dir}/?open=${id}`;
+
+    GAMES.forEach((game, i) => {
+      const slide = el('section', 'hub-slide');
+      slide.id = game.slug;
+      slide.setAttribute('aria-label', game.title);
+      const card = el('div', 'landing-card');
+
+      const h1 = el('h1', 'landing-title');
+      const icon = el('span', 'landing-title-icon', game.icon);
+      icon.setAttribute('aria-hidden', 'true');
+      h1.append(icon, ' ' + game.title);
+      const date = el('p', 'landing-date');
+      date.dataset.date = '';
+
+      const stack = el('div', 'landing-stack');
+      const cards = el('div', 'daily-cards');
+      for (const daily of game.dailies) {
+        const a = link(openUrl(game, daily.open), 'daily-card');
+        const badge = el('span', 'daily-card-status');
+        badge.dataset.statusFor = `${i}:${game.dailies.indexOf(daily)}`;
+        a.append(el('span', 'daily-card-name', daily.name), el('span', 'daily-card-desc', daily.desc), badge);
+        cards.append(a);
+      }
+      const row = el('div', 'landing-row');
+      row.append(link(openUrl(game, 'btn-free-play'), 'landing-btn', '자유 연습'),
+                 link(openUrl(game, 'btn-archive'), 'landing-btn', '지난 퍼즐'));
+      const mini = el('div', 'landing-mini-actions');
+      const dark = el('button', 'landing-mini-btn', '다크 모드');
+      dark.type = 'button';
+      dark.addEventListener('click', toggleDark);
+      mini.append(link(openUrl(game, 'btn-landing-stats'), 'landing-mini-btn', '통계'), dark);
+      stack.append(cards, row, mini);
+
+      const footer = el('p', 'landing-footer');
+      footer.append(link('https://github.com/nuclyee72/ProjectDaily', null, 'nuclyee'));
+      footer.lastChild.target = '_blank';
+      footer.lastChild.rel = 'noopener';
+
+      card.append(h1, date, stack, footer);
+      slide.append(card);
+      track.append(slide);
+
+      const dot = el('button', 'hub-dot');
+      dot.type = 'button';
+      dot.setAttribute('aria-label', game.title);
+      dot.addEventListener('click', () => goTo(i));
+      dotsEl.append(dot);
+    });
+
+    function refreshStatus() {
+      const today = todayStr();
+      document.querySelectorAll('[data-date]').forEach((p) => { p.textContent = today; });
+      document.querySelectorAll('[data-status-for]').forEach((badge) => {
+        const [gi, di] = badge.dataset.statusFor.split(':').map(Number);
+        const [text, status] = GAMES[gi].dailies[di].status(today);
+        badge.textContent = text;
+        badge.dataset.status = status;
+      });
+    }
+
+    // ── 슬라이드 이동 ──
+    let current = 0;
+    function goTo(i, smooth = true) {
+      i = Math.max(0, Math.min(GAMES.length - 1, i));
+      track.scrollTo({ left: i * track.clientWidth, behavior: smooth ? 'smooth' : 'instant' });
+      setCurrent(i);
+    }
+    function setCurrent(i) {
+      current = i;
+      [...dotsEl.children].forEach((d, j) => d.setAttribute('aria-current', String(j === i)));
+      prevBtn.disabled = i === 0;
+      nextBtn.disabled = i === GAMES.length - 1;
+      // 게임에서 돌아올 때 같은 게임이 보이도록 주소에 남긴다 (#sudoku 등)
+      history.replaceState(null, '', '#' + GAMES[i].slug);
+    }
+    // 카드가 제자리에 멈췄을 때만 갱신 — 부드러운 스크롤 도중의 중간 위치로 점이 되돌아가지 않게
+    track.addEventListener('scroll', () => {
+      const x = track.scrollLeft / track.clientWidth;
+      const i = Math.round(x);
+      if (Math.abs(x - i) < 0.02 && i !== current) setCurrent(i);
+    }, { passive: true });
+    window.addEventListener('resize', () => { track.scrollLeft = current * track.clientWidth; });
+    prevBtn.addEventListener('click', () => goTo(current - 1));
+    nextBtn.addEventListener('click', () => goTo(current + 1));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') goTo(current - 1);
+      else if (e.key === 'ArrowRight') goTo(current + 1);
+    });
+
+    // ── 다크 모드 — 허브에서 바꾸면 세 게임 모두 같이 바뀐다 ──
+    function toggleDark() {
+      const on = document.documentElement.getAttribute('data-theme') !== 'dark';
+      if (on) document.documentElement.setAttribute('data-theme', 'dark');
+      else document.documentElement.removeAttribute('data-theme');
+      try { DARK_KEYS.forEach((k) => localStorage.setItem(k, on ? '1' : '0')); } catch {}
+    }
+
+    // ── 시작 ──
+    refreshStatus();
+    const start = GAMES.findIndex((g) => '#' + g.slug === location.hash);
+    goTo(start < 0 ? 0 : start, false);
+    // 뒤로 가기(bfcache)로 돌아오거나 탭을 다시 볼 때 — 게임에서 바뀐 상태·날짜 반영
+    window.addEventListener('pageshow', refreshStatus);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshStatus(); });
+  </script>
+</body>
+</html>

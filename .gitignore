@@ -1,0 +1,10 @@
+# 이 레포에 올리지 않는 로컬 전용 폴더
+SudokuTycoon/
+.claude/
+
+# 공통
+node_modules/
+.env
+.DS_Store
+Thumbs.db
+desktop.ini

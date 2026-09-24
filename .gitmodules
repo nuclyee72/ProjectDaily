@@ -1,0 +1,12 @@
+[submodule "DailySudoku"]
+	path = DailySudoku
+	url = https://github.com/nuclyee72/DailySudoku.git
+	branch = main
+[submodule "DailyTrilateral"]
+	path = DailyTrilateral
+	url = https://github.com/nuclyee72/DailyTrilateral.git
+	branch = main
+[submodule "DailyWordship"]
+	path = DailyWordship
+	url = https://github.com/nuclyee72/DailyWordship.git
+	branch = main
