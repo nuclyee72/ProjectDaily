@@ -10,6 +10,7 @@
 ```
 ProjectDaily/                  ← 이 레포 (허브)
 ├─ index.html                  ← 메인 화면. 카드 안에서 지난 퍼즐 · 자유 연습 모드 · 통계까지
+├─ about.html · privacy.html   ← 소개 · 개인정보처리방침 (허브 카드 아래 링크, 공용 스타일 page.css)
 ├─ scripts/assemble-site.mjs   ← 허브 + 세 게임을 배포용 사이트 하나로 조립
 ├─ tests/                      ← 브라우저 자동 테스트 (Playwright)
 ├─ .github/workflows/pages.yml ← 배포
@@ -57,6 +58,13 @@ ProjectDaily/                  ← 이 레포 (허브)
   - 발급: https://github.com/settings/personal-access-tokens/new
   - 등록: 각 게임 레포 Settings → Secrets and variables → Actions → `HUB_DEPLOY_TOKEN`
 
+## 광고 · 도메인 루트 (`nuclyee72/nuclyee72.github.io`)
+
+광고 인증 파일 `ads.txt`는 도메인 루트(`https://nuclyee72.github.io/ads.txt`)에만 둘 수 있어서, 사용자 사이트 레포 [`nuclyee72/nuclyee72.github.io`](https://github.com/nuclyee72/nuclyee72.github.io)에 따로 있다. 루트 `index.html`은 `/ProjectDaily/`로 보낸다.
+
+- AdSense 게시자 ID가 생기면 그 레포의 `ads.txt` 주석 줄을 실제 ID로 바꾼다.
+- 광고 서비스를 바꾸거나 추가하면 `privacy.html` 3항도 같이 고친다.
+
 ## 로컬 작업
 
 ```bash
@@ -73,6 +81,6 @@ npm test             # 조립 → /ProjectDaily/ 경로로 로컬 서빙 → 브
 
 ### 테스트가 확인하는 것
 
-- `hub.test.cjs` — 스와이프 · 딥링크 · 지난 퍼즐(카드 안) → 게임 · "메인 화면" → 허브 · 뒤로가기 · 다크 모드 공유 · 직접 접속 · 아침 6시 날짜 갱신
+- `hub.test.cjs` — 스와이프 · 딥링크 · 지난 퍼즐(카드 안) → 게임 · "메인 화면" → 허브 · 뒤로가기 · 다크 모드 공유 · 직접 접속 · 아침 6시 날짜 갱신 · 소개/개인정보처리방침 링크
 - `stats.test.cjs` — 허브 통계가 게임 통계창과 같은지 (숫자 · 분포 · 달력 공유 문구 · 오늘 결과 공유 문구), 자유 연습 모드 고르기
 - `layout.test.cjs` — 메인·모든 하위 화면이 320×480 ~ 1280×720에서 카드 폭 그대로 · 스크롤 없이 들어가는지 (6줄 달 기준)

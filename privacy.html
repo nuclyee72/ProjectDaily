@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>개인정보처리방침 · 데일리 퍼즐</title>
+  <meta name="description" content="데일리 퍼즐의 개인정보처리방침 — 브라우저에 저장되는 기록, 광고 쿠키, 맞춤 광고 해제 방법."/>
+  <meta name="theme-color" content="#2f9e60"/>
+  <link rel="icon" href="icon.svg" type="image/svg+xml"/>
+  <script>
+    // 허브와 같은 다크 모드 설정을 먼저 적용 (index.html과 같은 규칙)
+    try {
+      const hub = localStorage.getItem('daily-dark-mode');
+      const on = hub != null ? hub === '1'
+        : ['sudoku-dark-mode', 'trilateral-dark-mode', 'wordship-dark-mode'].some((k) => localStorage.getItem(k) === '1');
+      if (on) document.documentElement.setAttribute('data-theme', 'dark');
+    } catch {}
+  </script>
+  <link rel="stylesheet" href="page.css"/>
+</head>
+<body>
+  <main class="page">
+    <a class="page-back" href="./">‹ 퍼즐로 돌아가기</a>
+    <article class="page-card">
+      <h1>개인정보처리방침</h1>
+      <p class="page-lead">데일리 퍼즐(https://nuclyee72.github.io/ProjectDaily/, 이하 "사이트")은 이용자의 개인정보를 소중히 다루며, 「개인정보 보호법」 등 관련 법령을 지킵니다.</p>
+      <p class="page-meta">시행일: 2026년 9월 25일</p>
+
+      <h2>1. 운영자가 수집하는 개인정보</h2>
+      <p>사이트는 회원가입이 없고, 운영자는 이름 · 이메일 · 전화번호 같은 개인정보를 <strong>수집하거나 서버에 저장하지 않습니다.</strong></p>
+
+      <h2>2. 이용자 브라우저에 저장되는 정보</h2>
+      <p>퍼즐 진행 상황 · 플레이 기록 · 통계 · 다크 모드 같은 설정은 이용자 기기의 브라우저 저장소(localStorage)에만 저장되고, 운영자에게 전송되지 않습니다.</p>
+      <ul>
+        <li>저장 목적: 이어 하기, 지난 퍼즐 달력, 통계 표시, 설정 유지</li>
+        <li>보관 기간: 이용자가 지울 때까지</li>
+        <li>지우는 방법: 브라우저 설정에서 이 사이트의 쿠키 및 사이트 데이터를 삭제하면 모든 기록이 지워집니다.</li>
+      </ul>
+
+      <h2>3. 광고와 쿠키</h2>
+      <p>사이트는 운영비 마련을 위해 Google AdSense, 카카오 애드핏 등 제3자 광고 서비스를 통해 광고를 게재할 수 있습니다. 이 광고 서비스들은 쿠키 등을 사용해 다음과 같이 정보를 처리합니다.</p>
+      <ul>
+        <li>Google을 포함한 제3자 광고 사업자는 쿠키를 사용해 이용자가 이 사이트나 다른 웹사이트를 방문한 기록을 바탕으로 광고를 게재합니다.</li>
+        <li>Google은 광고 쿠키를 사용해, Google과 파트너가 이 사이트 및 인터넷의 다른 사이트 방문 기록을 바탕으로 이용자에게 광고를 게재할 수 있도록 합니다.</li>
+        <li>처리될 수 있는 정보: 쿠키 식별자, 광고 식별자, IP 주소, 브라우저 · 기기 정보, 방문한 페이지와 광고 조회 · 클릭 기록</li>
+        <li>이 정보는 각 광고 사업자가 자신의 개인정보처리방침에 따라 처리하며, 운영자는 이를 받아 보관하지 않습니다.</li>
+      </ul>
+      <h3>맞춤 광고를 끄는 방법</h3>
+      <ul>
+        <li>Google: <a href="https://myadcenter.google.com/" target="_blank" rel="noopener">내 광고 센터</a>에서 맞춤 광고를 끌 수 있습니다.</li>
+        <li>제3자 광고 사업자 전체: <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener">www.aboutads.info</a>에서 맞춤 광고용 쿠키를 거부할 수 있습니다.</li>
+        <li>브라우저 설정에서 쿠키 저장을 거부할 수도 있습니다. 쿠키를 거부해도 퍼즐은 그대로 이용할 수 있습니다(단, 브라우저 저장소까지 막으면 기록이 저장되지 않을 수 있습니다).</li>
+      </ul>
+      <h3>관련 방침</h3>
+      <ul>
+        <li><a href="https://policies.google.com/technologies/partner-sites?hl=ko" target="_blank" rel="noopener">Google이 파트너 사이트의 정보를 사용하는 방식</a></li>
+        <li><a href="https://policies.google.com/privacy?hl=ko" target="_blank" rel="noopener">Google 개인정보처리방침</a></li>
+        <li><a href="https://www.kakao.com/policy/privacy" target="_blank" rel="noopener">카카오 개인정보처리방침</a></li>
+      </ul>
+
+      <h2>4. 호스팅</h2>
+      <p>사이트는 GitHub Pages로 제공됩니다. GitHub은 서비스 운영과 보안을 위해 접속 IP 주소 등의 기록을 처리할 수 있으며, 이는 <a href="https://docs.github.com/ko/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub 개인정보처리방침</a>을 따릅니다.</p>
+
+      <h2>5. 개인정보 제3자 제공 · 처리 위탁</h2>
+      <p>운영자는 개인정보를 수집하지 않으므로, 제3자에게 제공하거나 처리를 위탁하는 개인정보가 없습니다. 위 3 · 4항의 정보는 각 사업자가 직접 처리합니다.</p>
+
+      <h2>6. 이용자의 권리</h2>
+      <p>이용자는 언제든 브라우저 데이터를 삭제하거나 쿠키를 거부해 정보 처리를 멈출 수 있고, 광고 사업자에게 직접 열람 · 삭제를 요청할 수 있습니다.</p>
+
+      <h2>7. 문의</h2>
+      <p>개인정보와 관련한 문의는 <a href="https://github.com/nuclyee72/ProjectDaily/issues" target="_blank" rel="noopener">GitHub 이슈</a>로 남겨 주세요. 운영자(nuclyee72)가 확인 후 답변합니다.</p>
+
+      <h2>8. 방침의 변경</h2>
+      <p>이 방침이 바뀌면 이 페이지에 시행일과 함께 게시합니다.</p>
+    </article>
+    <p class="page-footer"><a href="./">데일리 퍼즐</a> · <a href="about.html">소개</a></p>
+  </main>
+</body>
+</html>

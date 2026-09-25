@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>데일리 퍼즐</title>
+  <meta name="description" content="하루 한 판, 매일 아침 새로 열리는 퍼즐 세 가지 — 데일리 스도쿠 · 데일리 삼각관계 · 데일리 워드십."/>
   <meta name="theme-color" content="#2f9e60"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-title" content="데일리 퍼즐"/>
@@ -996,7 +997,7 @@
       const repo = link('https://github.com/nuclyee72/ProjectDaily', null, 'nuclyee');
       repo.target = '_blank';
       repo.rel = 'noopener';
-      footer.append(repo);
+      footer.append(link('about.html', null, '소개'), ' · ', link('privacy.html', null, '개인정보처리방침'), ' · ', repo);
 
       card.append(back, h1, date, main, ...Object.values(subs).map((s) => s.view), footer);
       slide.append(card);

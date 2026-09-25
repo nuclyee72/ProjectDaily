@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.resolve(process.argv[2] ?? '_site');
 
-const HUB_FILES = ['index.html', '.nojekyll', 'icon.svg', 'manifest.webmanifest'];
+const HUB_FILES = ['index.html', 'about.html', 'privacy.html', 'page.css', '.nojekyll', 'icon.svg', 'manifest.webmanifest'];
 // 게임마다 사이트에 필요한 것만 (scripts · docs · node_modules 등은 제외)
 const GAME_FILES = {
   DailySudoku:     ['index.html', 'style.css', 'icon.svg', 'manifest.webmanifest', 'src', 'daily'],

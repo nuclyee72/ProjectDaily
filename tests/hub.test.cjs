@@ -161,6 +161,28 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
   await p3.waitForTimeout(600);
   check(new URL(p3.url()).hash === '#wordship', '데스크톱: › 버튼으로 다음 게임');
 
+  // 11. 소개 · 개인정보처리방침 — 허브 푸터 링크 → 글 페이지 (좁은 화면 가로 넘침 없음 · 다크 모드 공유) → 돌아가기
+  const ctxP = await browser.newContext({ viewport: { width: 320, height: 568 } });
+  await ctxP.addInitScript(() => { try { localStorage.setItem('daily-dark-mode', '1'); } catch {} });
+  const pp = await ctxP.newPage();
+  pp.on('pageerror', (e) => errors.push(e.message));
+  for (const [text, file] of [['소개', 'about.html'], ['개인정보처리방침', 'privacy.html']]) {
+    await pp.goto(BASE);
+    await pp.locator('#sudoku .landing-footer a', { hasText: text }).click();
+    await pp.waitForURL((u) => u.pathname.endsWith(`/ProjectDaily/${file}`));
+    const r = await pp.evaluate(() => ({
+      h1: !!document.querySelector('.page-card h1'),
+      styled: getComputedStyle(document.querySelector('.page-card')).borderRadius !== '0px',
+      wide: document.documentElement.scrollWidth > innerWidth,
+      dark: document.documentElement.dataset.theme === 'dark',
+    }));
+    check(r.h1 && r.styled && !r.wide && r.dark, `허브 푸터 → ${text} (${JSON.stringify(r)})`);
+    await pp.screenshot({ path: path.join(SHOTS, `11-${file.replace('.html', '')}.png`), fullPage: true });
+    await pp.click('.page-back');
+    await pp.waitForURL((u) => u.pathname.endsWith('/ProjectDaily/'));
+  }
+  await ctxP.close();
+
   // 아침 6시(KST) 리셋 — 허브를 켜 둔 채 넘어가도 날짜가 바뀜
   const ctxR = await browser.newContext();
   const pr = await ctxR.newPage();
