@@ -113,14 +113,27 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
   await page.goto(BASE);
   check(await page.evaluate(() => document.documentElement.getAttribute('data-theme')) !== 'dark', '게임에서 다크 모드 끄면 허브도 꺼짐');
 
-  // 9. 새 탭에서 게임 주소로 직접 접속 — 기존처럼 게임 랜딩, "‹ 전체 게임" 링크
+  // 9. 새 탭에서 게임 주소로 직접 접속
   const ctx2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx2.addInitScript(() => { try { localStorage.setItem('wordship:seen-help', '1'); } catch {} });
   const p2 = await ctx2.newPage();
   p2.on('pageerror', (e) => errors.push(e.message));
+  // 워드십은 메인 화면이 허브 카드 하나 — 게임 주소로 바로 오면 허브 #wordship
   await p2.goto(BASE + 'DailyWordship/');
+  await p2.waitForURL(/\/ProjectDaily\/#wordship$/);
+  check(await p2.locator('#wordship .daily-card-status').first().isVisible(), '워드십 직접 접속 → 허브 #wordship 카드');
+  const extDesc = p2.locator('#wordship .daily-card-desc').nth(1);
+  await p2.waitForFunction((e) => !e.textContent.startsWith('매일'), await extDesc.elementHandle(), { timeout: 5000 }).catch(() => {});
+  check(/ · /.test(await extDesc.textContent()) && !(await extDesc.textContent()).startsWith('매일'), `허브 익스텐디드 카드 = 오늘의 기믹 (${await extDesc.textContent()})`);
+  await p2.locator('#wordship a.daily-card').first().click();
+  await p2.waitForFunction(() => !document.getElementById('game-screen').classList.contains('hidden'), null, { timeout: 15000 });
+  await p2.reload();
+  await p2.waitForURL(/\/ProjectDaily\/#wordship$/);
+  check(true, '워드십 게임에서 새로고침 → 허브 (진행은 저장돼 카드에서 이어 하기)');
+  // 스도쿠·삼각관계는 지금처럼 게임 자체 랜딩, "‹ 뒤로" 링크
+  await p2.goto(BASE + 'DailyTrilateral/');
   check(await p2.evaluate(() => !document.getElementById('landing-screen').classList.contains('hidden')), '직접 접속: 게임 랜딩 표시');
-  check(await p2.getAttribute('.hub-back', 'href') === '/ProjectDaily/#wordship', '직접 접속: ‹ 뒤로 링크 = /ProjectDaily/#wordship');
+  check(await p2.getAttribute('.hub-back', 'href') === '/ProjectDaily/#trilateral', '직접 접속: ‹ 뒤로 링크 = /ProjectDaily/#trilateral');
   check((await p2.textContent('.hub-back')) === '‹ 뒤로' && (await p2.locator('#archive-back').count()) === 0, '게임: "‹ 전체 게임" → "‹ 뒤로", 원래 뒤로 버튼 삭제');
   await p2.click('#btn-archive');
   check((await p2.locator('.landing-card').evaluate((e) => e.getBoundingClientRect().width)) === 340, '게임 지난 퍼즐: 카드 폭 340 그대로');
@@ -131,10 +144,10 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
   await p2.waitForFunction(() => !document.getElementById('game-screen').classList.contains('hidden'), null, { timeout: 15000 });
   await p2.click('#btn-go-landing');
   await p2.waitForTimeout(300);
-  check(p2.url().endsWith('/DailyWordship/') && await p2.evaluate(() => !document.getElementById('landing-screen').classList.contains('hidden')), '직접 접속: 메인 화면 = 게임 랜딩 (기존 동작 유지)');
+  check(p2.url().endsWith('/DailyTrilateral/') && await p2.evaluate(() => !document.getElementById('landing-screen').classList.contains('hidden')), '직접 접속: 메인 화면 = 게임 랜딩 (기존 동작 유지)');
   await p2.click('.hub-back');
-  await p2.waitForURL(/\/ProjectDaily\/#wordship$/);
-  check(true, '‹ 전체 게임 → 허브 #wordship');
+  await p2.waitForURL(/\/ProjectDaily\/#trilateral$/);
+  check(true, '‹ 뒤로 → 허브 #trilateral');
 
   // 10. 데스크톱 화면
   const ctx3 = await browser.newContext({ viewport: { width: 1280, height: 800 } });

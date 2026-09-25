@@ -32,14 +32,20 @@ const clip = (p) => p.evaluate(() => navigator.clipboard.readText());
     { slug: 'sudoku', dir: 'DailySudoku', mode: 'extended', label: '익스텐디드', tab: (p) => p.click('.daily-stats-tab[data-variant="extended"]') },
     { slug: 'sudoku', dir: 'DailySudoku', mode: 'standard', label: '스탠다드', tab: async () => {} },
     { slug: 'trilateral', dir: 'DailyTrilateral', mode: 'standard', label: '스탠다드', tab: async () => {} },
-    { slug: 'wordship', dir: 'DailyWordship', mode: 'idiom', label: '사자성어', tab: (p) => p.click('.daily-stats-tab[data-mode="idiom"]') },
+    // 워드십은 게임 주소로 바로 가면 허브로 가므로, 허브가 쓰는 ?open= 으로 게임 통계창을 연다
+    { slug: 'wordship', dir: 'DailyWordship', mode: 'idiom', label: '사자성어', viaOpen: true, tab: (p) => p.click('.daily-stats-tab[data-mode="idiom"]') },
   ];
   for (const g of games) {
     // 게임 통계창
     const gctx = await newCtx(b); const gp = await gctx.newPage();
     await gp.clock.setFixedTime(new Date(`${TODAY}T12:00:00+09:00`));
-    await gp.goto(`${BASE}${g.dir}/`);
-    await gp.click('#btn-landing-stats');
+    if (g.viaOpen) {
+      await gp.goto(`${BASE}${g.dir}/?open=btn-landing-stats`);
+      await gp.waitForSelector('#daily-stats-modal.show');
+    } else {
+      await gp.goto(`${BASE}${g.dir}/`);
+      await gp.click('#btn-landing-stats');
+    }
     await g.tab(gp);
     await gp.waitForTimeout(200);
     const gameNums = await gp.evaluate(() => ['stat-played', 'stat-winrate', 'stat-streak', 'stat-maxstreak'].map((id) => document.getElementById(id).textContent));

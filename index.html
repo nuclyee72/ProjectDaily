@@ -537,6 +537,7 @@
   <script>
     // ── 게임 목록 ──
     // dailies.open: 게임 랜딩 버튼 id (게임 쪽 src/hub.js가 ?open= 으로 받아 눌러 준다)
+    // dailies.todayDesc: 설명을 그날 퍼즐로 바꿀 모드 — 게임 hubApi.dailyDesc(모드)가 준 문구로 (워드십 익스텐디드: 그날의 기믹)
     // modes: 지난 퍼즐 · 통계 모드 탭 / free: 자유 연습 모드 (없으면 바로 게임으로)
     const GAMES = [
       {
@@ -570,7 +571,7 @@
         dailies: [
           { open: 'btn-daily-play', name: '스탠다드', desc: '8×8 · 함선 6척 · 추측 30번',
             status: (d) => guessStatus(d, 'wordship:stats', 'wordship:progress:' + d, 30) },
-          { open: 'btn-daily-play-extended', name: '익스텐디드', desc: '매일 바뀌는 기믹 2개 · 추측 35번',
+          { open: 'btn-daily-play-extended', name: '익스텐디드', desc: '매일 바뀌는 기믹 2개 · 추측 35번', todayDesc: 'extended',
             status: (d) => guessStatus(d, 'wordship:stats:extended', 'wordship:progress:extended:' + d, 35) },
           { open: 'btn-daily-play-idiom', name: '사자성어', desc: '8×8 · 사자성어 함선 5척 · 추측 20번',
             status: (d) => guessStatus(d, 'wordship:stats:idiom', 'wordship:progress:idiom:' + d, 20) },
@@ -954,7 +955,9 @@
         const a = link(openUrl(game, daily.open), 'daily-card');
         const badge = el('span', 'daily-card-status');
         badge.dataset.statusFor = `${i}:${di}`;
-        a.append(el('span', 'daily-card-name', daily.name), el('span', 'daily-card-desc', daily.desc), badge);
+        const desc = el('span', 'daily-card-desc', daily.desc);
+        if (daily.todayDesc) desc.dataset.descFor = `${i}:${di}`;
+        a.append(el('span', 'daily-card-name', daily.name), desc, badge);
         cards.append(a);
       });
       const row = el('div', 'landing-row');
@@ -1013,6 +1016,14 @@
         const [text, status] = GAMES[gi].dailies[di].status(today);
         badge.textContent = text;
         badge.dataset.status = status;
+      });
+      // 그날 퍼즐에 따라 바뀌는 설명 — 못 받아 오면 고정 설명 그대로
+      document.querySelectorAll('[data-desc-for]').forEach((desc) => {
+        const [gi, di] = desc.dataset.descFor.split(':').map(Number);
+        const daily = GAMES[gi].dailies[di];
+        loadApi(GAMES[gi]).then((api) => api.dailyDesc?.(daily.todayDesc)).then((text) => {
+          if (todayStr() === today) desc.textContent = text || daily.desc;
+        }).catch(() => {});
       });
       cardViews.forEach((v) => v.render()); // 열려 있는 하위 화면(달력·통계)도 다시
     }
