@@ -87,7 +87,7 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
   }
 
   // 6. 워드십 사자성어 → 게임 → 메인 화면 → 허브
-  await page.locator('#wordship a.daily-card').nth(1).click();
+  await page.locator('#wordship a.daily-card').nth(2).click(); // 스탠다드 · 익스텐디드 · 사자성어
   await page.waitForURL(/DailyWordship\/$/);
   await page.waitForFunction(() => !document.getElementById('game-screen').classList.contains('hidden'), null, { timeout: 15000 });
   await page.screenshot({ path: path.join(SHOTS, '6-wordship-game.png') });

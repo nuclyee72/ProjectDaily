@@ -163,6 +163,10 @@
     .daily-card-status[data-status="solved"]  { background: var(--cell-selected); color: var(--text-sel); }
     .daily-card-status[data-status="timeout"] { background: var(--surface-danger); color: var(--conflict); }
     .daily-card-status[data-status="playing"] { background: var(--playing-bg); color: var(--playing-text); }
+    /* 카드가 3개인 게임(워드십) — 상태 배지를 이름 오른쪽으로 올려 한 줄을 아낀다 */
+    .daily-cards.is-compact .daily-card { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 10px; }
+    .daily-cards.is-compact .daily-card-desc { grid-column: 1 / -1; }
+    .daily-cards.is-compact .daily-card-status { grid-column: 2; grid-row: 1; margin-top: 0; white-space: nowrap; }
 
     .landing-row { display: flex; gap: 10px; }
     .landing-btn {
@@ -559,12 +563,15 @@
       },
       {
         slug: 'wordship', dir: 'DailyWordship', icon: '🚢', title: '데일리 워드십', firstDate: '2026-09-23',
-        modes: [['standard', '스탠다드'], ['idiom', '사자성어']],
-        records: (mode) => guessRecords(mode === 'standard' ? 'wordship:stats' : 'wordship:stats:idiom'),
-        free: [['standard', '스탠다드', '8×8 · 함선 6척 · 추측 30번'], ['idiom', '사자성어', '8×8 · 사자성어 함선 5척 · 추측 20번']],
+        modes: [['standard', '스탠다드'], ['extended', '익스텐디드'], ['idiom', '사자성어']],
+        records: (mode) => guessRecords(mode === 'standard' ? 'wordship:stats' : 'wordship:stats:' + mode),
+        free: [['standard', '스탠다드', '8×8 · 함선 6척 · 추측 30번'], ['extended', '익스텐디드', '무작위 기믹 2개 · 추측 40번'],
+          ['idiom', '사자성어', '8×8 · 사자성어 함선 5척 · 추측 20번']],
         dailies: [
           { open: 'btn-daily-play', name: '스탠다드', desc: '8×8 · 함선 6척 · 추측 30번',
             status: (d) => guessStatus(d, 'wordship:stats', 'wordship:progress:' + d, 30) },
+          { open: 'btn-daily-play-extended', name: '익스텐디드', desc: '매일 바뀌는 기믹 2개 · 추측 40번',
+            status: (d) => guessStatus(d, 'wordship:stats:extended', 'wordship:progress:extended:' + d, 40) },
           { open: 'btn-daily-play-idiom', name: '사자성어', desc: '8×8 · 사자성어 함선 5척 · 추측 20번',
             status: (d) => guessStatus(d, 'wordship:stats:idiom', 'wordship:progress:idiom:' + d, 20) },
         ],
@@ -623,7 +630,8 @@
       if (r?.status === 'failed') return ['실패', 'timeout'];
       const p = readJSON(progressKey);
       if (maxGuesses) {
-        if (p?.guesses?.length) return [`진행 중 · ${p.guesses.length}/${maxGuesses}`, 'playing'];
+        // used = 벌점 포함 쓴 추측 수 (워드십 익스텐디드 '비싼 추측'). 예전 기록엔 없어서 추측 개수로
+        if (p?.guesses?.length) return [`진행 중 · ${p.used ?? p.guesses.length}/${maxGuesses}`, 'playing'];
       } else if (p?.status === 'playing') return ['진행 중', 'playing'];
       return ['플레이 전', 'new'];
     }
@@ -941,7 +949,7 @@
 
       // 메인
       const main = el('div', 'landing-stack');
-      const cards = el('div', 'daily-cards');
+      const cards = el('div', game.dailies.length > 2 ? 'daily-cards is-compact' : 'daily-cards');
       game.dailies.forEach((daily, di) => {
         const a = link(openUrl(game, daily.open), 'daily-card');
         const badge = el('span', 'daily-card-status');
