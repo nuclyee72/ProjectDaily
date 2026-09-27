@@ -1001,7 +1001,7 @@
         cards.append(a);
       });
       const row = el('div', 'landing-row');
-      // 자유 연습: 모드가 있는 게임은 카드 안에서 고르고, 없는 게임(스도쿠)은 바로 게임으로
+      // 자유 연습: 모드가 있는 게임은 카드 안에서 고르고, 없는 게임(스도쿠)은 게임 랜딩 카드 안의 조합 고르기로
       const freeBtn = game.free ? button('landing-btn', '자유 연습') : link(openUrl(game, 'btn-free-play'), 'landing-btn', '자유 연습');
       const archiveBtn = button('landing-btn', '지난 퍼즐');
       row.append(freeBtn, archiveBtn);
