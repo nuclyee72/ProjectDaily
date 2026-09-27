@@ -119,6 +119,9 @@
       font-size: 26px;
       font-weight: 700;
       color: var(--text-given);
+      /* 긴 제목(데일리 흑백 지뢰찾기)이 단어 중간에서 끊기지 않게, 두 줄이면 고르게 */
+      word-break: keep-all;
+      text-wrap: balance;
     }
     .landing-title-icon { font-size: 0.9em; margin-right: 2px; }
     .landing-date {
@@ -580,7 +583,7 @@
         ],
       },
       {
-        slug: 'bwsweeper', dir: 'DailyBWSweeper', icon: '◩', title: '흑백 지뢰찾기', firstDate: '2026-09-20',
+        slug: 'bwsweeper', dir: 'DailyBWSweeper', icon: '◩', title: '데일리 흑백 지뢰찾기', firstDate: '2026-09-20',
         modes: [['standard', '스탠다드'], ['extended', '익스텐디드']],
         records: (mode) => bwRecords(`bwsweeper:stats:${mode}`),
         free: [['standard', '스탠다드', '12×12 · 레이저 3 · 지뢰 24'], ['extended', '익스텐디드', '16×16 · 레이저 5 · 지뢰 38']],
