@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * assemble-site.mjs — 허브 + 세 게임(서브모듈)을 GitHub Pages에 올릴 한 사이트로 조립한다.
+ * assemble-site.mjs — 허브 + 게임들(서브모듈)을 GitHub Pages에 올릴 한 사이트로 조립한다.
  * 허브는 사이트 루트, 게임은 각자 폴더 (/ProjectDaily/DailySudoku/ 등).
  * 배포 워크플로(.github/workflows/pages.yml)와 로컬 테스트(tests/)가 같이 쓴다.
  *
@@ -19,6 +19,7 @@ const GAME_FILES = {
   DailySudoku:     ['index.html', 'style.css', 'icon.svg', 'manifest.webmanifest', 'src', 'daily'],
   DailyTrilateral: ['index.html', 'style.css', 'icon.svg', 'manifest.webmanifest', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'src', 'daily'],
   DailyWordship:   ['index.html', 'style.css', 'icon.svg', 'manifest.webmanifest', 'src', 'daily'],
+  DailyBWSweeper:  ['index.html', 'style.css', 'icon.svg', 'manifest.webmanifest', 'src'], // 데일리 판은 날짜 시드로 브라우저에서 만든다 (daily 폴더 없음)
 };
 
 rmSync(OUT, { recursive: true, force: true });

@@ -10,3 +10,7 @@
 	path = DailyWordship
 	url = https://github.com/nuclyee72/DailyWordship.git
 	branch = main
+[submodule "DailyBWSweeper"]
+	path = DailyBWSweeper
+	url = https://github.com/nuclyee72/DailyBWSweeper.git
+	branch = main

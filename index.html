@@ -19,7 +19,7 @@
     try {
       const hub = localStorage.getItem('daily-dark-mode');
       const on = hub != null ? hub === '1'
-        : ['sudoku-dark-mode', 'trilateral-dark-mode', 'wordship-dark-mode'].some((k) => localStorage.getItem(k) === '1');
+        : ['sudoku-dark-mode', 'trilateral-dark-mode', 'wordship-dark-mode', 'bwsweeper-dark-mode'].some((k) => localStorage.getItem(k) === '1');
       if (on) document.documentElement.setAttribute('data-theme', 'dark');
     } catch {}
   </script>
@@ -579,8 +579,18 @@
             status: (d) => guessStatus(d, 'wordship:stats:idiom', 'wordship:progress:idiom:' + d, 20) },
         ],
       },
+      {
+        slug: 'bwsweeper', dir: 'DailyBWSweeper', icon: '◩', title: '흑백 지뢰찾기', firstDate: '2026-09-20',
+        modes: [['standard', '스탠다드'], ['extended', '익스텐디드']],
+        records: (mode) => bwRecords(`bwsweeper:stats:${mode}`),
+        free: [['standard', '스탠다드', '12×12 · 레이저 3 · 지뢰 24'], ['extended', '익스텐디드', '16×16 · 레이저 5 · 지뢰 38']],
+        dailies: [
+          { open: 'btn-daily-standard', name: '스탠다드', desc: '12×12 · 레이저 3 · 지뢰 24', status: (d) => bwStatus(d, 'standard') },
+          { open: 'btn-daily-extended', name: '익스텐디드', desc: '16×16 · 레이저 5 · 지뢰 38', status: (d) => bwStatus(d, 'extended') },
+        ],
+      },
     ];
-    const DARK_KEYS = ['daily-dark-mode', 'sudoku-dark-mode', 'trilateral-dark-mode', 'wordship-dark-mode'];
+    const DARK_KEYS = ['daily-dark-mode', 'sudoku-dark-mode', 'trilateral-dark-mode', 'wordship-dark-mode', 'bwsweeper-dark-mode'];
 
     // ── 날짜 — 게임들과 같은 규칙: 데일리 경계 = KST 06:00 = UTC+3 자정 ──
     const DAY_OFFSET_MS = 3 * 60 * 60 * 1000;
@@ -639,6 +649,20 @@
       return ['플레이 전', 'new'];
     }
 
+    // 흑백 지뢰찾기: 성공이면 걸린 시간, 하던 중이면 지금까지 시간
+    function bwStatus(date, mode) {
+      const r = readJSON(`bwsweeper:stats:${mode}`)?.results?.[date];
+      if (r?.status === 'solved') return ['성공 · ' + fmtMSS(r.seconds * 1000), 'solved'];
+      if (r?.status === 'failed') return ['실패', 'timeout'];
+      const p = readJSON(`bwsweeper:progress:${mode}:${date}`);
+      if (p?.status === 'playing' && p.elapsed > 1000) return ['진행 중 · ' + fmtMSS(p.elapsed), 'playing'];
+      return ['플레이 전', 'new'];
+    }
+    function fmtMSS(ms) {
+      const t = Math.max(0, Math.round(ms / 1000));
+      return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
+    }
+
     // ── 달력 칸 기록 — 각 게임 달력과 같은 표시 ──
     // 스도쿠: 평균보다 빠를수록 진한 초록(시간) / 완성률이 낮을수록 진한 빨강(%)
     function calSolveColor(ms, avg) {
@@ -676,6 +700,18 @@
         if (!r) return null;
         return r.status === 'solved'
           ? { cls: 'cal-cell--solved', val: r.attempt ? `${r.attempt}번` : '✓' }
+          : { cls: 'cal-cell--fail', val: '✕' };
+      };
+    }
+
+    // 흑백 지뢰찾기: 성공 = 걸린 시간, 실패 = ✕
+    function bwRecords(statsKey) {
+      const results = readJSON(statsKey)?.results ?? {};
+      return (date) => {
+        const r = results[date];
+        if (!r) return null;
+        return r.status === 'solved'
+          ? { cls: 'cal-cell--solved', val: fmtMSS((r.seconds ?? 0) * 1000) }
           : { cls: 'cal-cell--fail', val: '✕' };
       };
     }

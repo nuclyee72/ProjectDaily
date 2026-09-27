@@ -1,9 +1,9 @@
 # ProjectDaily — 데일리 퍼즐
 
-하루 한 판 퍼즐 세 개를 한 사이트에서.
+하루 한 판 퍼즐 네 개를 한 사이트에서.
 
 - **메인(허브):** https://nuclyee72.github.io/ProjectDaily/ — 게임 카드를 좌우로 넘긴다
-- **게임:** `/ProjectDaily/DailySudoku/` · `/ProjectDaily/DailyTrilateral/` · `/ProjectDaily/DailyWordship/`
+- **게임:** `/ProjectDaily/DailySudoku/` · `/ProjectDaily/DailyTrilateral/` · `/ProjectDaily/DailyWordship/` · `/ProjectDaily/DailyBWSweeper/`
 
 ## 구조
 
@@ -11,19 +11,21 @@
 ProjectDaily/                  ← 이 레포 (허브)
 ├─ index.html                  ← 메인 화면. 카드 안에서 지난 퍼즐 · 자유 연습 모드 · 통계까지
 ├─ about.html · privacy.html   ← 소개 · 개인정보처리방침 (허브 카드 아래 링크, 공용 스타일 page.css)
-├─ scripts/assemble-site.mjs   ← 허브 + 세 게임을 배포용 사이트 하나로 조립
+├─ scripts/assemble-site.mjs   ← 허브 + 게임들을 배포용 사이트 하나로 조립
 ├─ tests/                      ← 브라우저 자동 테스트 (Playwright)
 ├─ .github/workflows/pages.yml ← 배포
 ├─ DailySudoku/                ← 서브모듈 → nuclyee72/DailySudoku
 ├─ DailyTrilateral/            ← 서브모듈 → nuclyee72/DailyTrilateral
-└─ DailyWordship/              ← 서브모듈 → nuclyee72/DailyWordship
+├─ DailyWordship/              ← 서브모듈 → nuclyee72/DailyWordship
+└─ DailyBWSweeper/             ← 서브모듈 → nuclyee72/DailyBWSweeper (흑백 지뢰찾기)
 ```
 
 게임 코드와 매일 퍼즐 생성(cron)은 각 게임 레포에 그대로 있다. 이 레포는 허브 페이지와 배포만 맡는다.
+흑백 지뢰찾기는 퍼즐 파일 없이 날짜를 시드로 브라우저에서 판을 만든다 (cron · `daily/` 폴더 없음).
 
 ## 허브 ↔ 게임 연결
 
-게임마다 `src/hub.js`(세 게임 공통 파일)와 `src/hubApi.js`가 있다.
+게임마다 `src/hub.js`(게임 공통 파일)와 `src/hubApi.js`가 있다.
 
 | 허브에서 | 게임 주소 | 게임이 하는 일 |
 |---|---|---|
@@ -33,10 +35,10 @@ ProjectDaily/                  ← 이 레포 (허브)
 | 통계 | (이동 없음) | 허브가 `src/hubApi.js`를 불러 게임 통계창과 같은 계산으로 표시 |
 
 - 허브에서 들어온 탭에서는 게임의 "메인 화면" · 지난 퍼즐 "뒤로" · 자유 연습 모드 취소가 허브로 돌아간다. 이때 방문 기록을 쌓지 않아서, 휴대폰 "뒤로"가 방금 나온 게임으로 되돌아가지 않는다.
-- 게임 주소로 직접 들어오면 스도쿠·삼각관계는 예전처럼 게임 자체 랜딩을 쓴다(왼쪽 위 "‹ 뒤로"는 허브로).
+- 게임 주소로 직접 들어오면 스도쿠·삼각관계·흑백 지뢰찾기는 예전처럼 게임 자체 랜딩을 쓴다(왼쪽 위 "‹ 뒤로"는 허브로).
   워드십은 메인 화면이 허브 카드 하나 — 게임 주소로 바로 오면(허브의 `?open`·`?archive`·`?free` 없이) 허브 `#wordship`으로 보낸다. 게임 자체 랜딩은 로컬 개발(`npm run dev`)에서만.
 - 워드십 익스텐디드 카드 설명은 그날의 기믹 이름 (`hubApi.dailyDesc`).
-- 다크 모드는 허브·세 게임이 같이 쓴다. 어디서 바꾸든 전부 같이 바뀐다 (`hub.js`의 `saveDarkMode`).
+- 다크 모드는 허브·모든 게임이 같이 쓴다. 어디서 바꾸든 전부 같이 바뀐다 (`hub.js`의 `saveDarkMode`).
 - 플레이 기록(localStorage)은 도메인 단위라, 게임 레포의 예전 주소(`/DailySudoku/` 등)와 새 주소가 같이 쓴다.
 
 ## 배포

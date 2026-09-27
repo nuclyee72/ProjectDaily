@@ -16,7 +16,7 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
 
   // 1. 허브
   await page.goto(BASE);
-  check((await page.locator('.hub-slide').count()) === 3, '허브: 게임 카드 3장');
+  check((await page.locator('.hub-slide').count()) === 4, '허브: 게임 카드 4장');
   check((await page.locator('.daily-card-status').allTextContents()).every((t) => t === '플레이 전'), '허브: 상태 배지 모두 "플레이 전"');
   await page.screenshot({ path: path.join(SHOTS, '1-hub-mobile.png') });
 

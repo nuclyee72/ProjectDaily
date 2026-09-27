@@ -14,7 +14,7 @@ const VIEWS = [['메인', null], ['지난 퍼즐', null], ['자유 연습', null
     const errs = []; p.on('pageerror', (e) => errs.push(e.message));
     await p.clock.setFixedTime(new Date('2027-01-15T12:00:00+09:00'));
     await p.goto(BASE);
-    for (const slug of ['sudoku', 'trilateral', 'wordship']) {
+    for (const slug of ['sudoku', 'trilateral', 'wordship', 'bwsweeper']) {
       await p.evaluate((s) => { location.hash = s; }, slug);
       await p.evaluate((s) => document.getElementById(s).scrollIntoView({ behavior: 'instant', inline: 'start' }), slug);
       const card = p.locator(`#${slug} .landing-card`);
