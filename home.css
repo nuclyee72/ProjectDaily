@@ -1,0 +1,220 @@
+/* home.css — 허브 홈 카드 (#home). 카드·숫자·버튼 같은 공통 모양은 index.html의 스타일을 그대로 쓴다. */
+:root {
+  /* 플레이 비율 게임 색 — 스도쿠 · 삼각관계 · 워드십 · 흑백 지뢰찾기 */
+  --home-c0: #2f9e60;
+  --home-c1: #e0862c;
+  --home-c2: #3b7fd9;
+  --home-c3: #6b6f80;
+}
+[data-theme="dark"] {
+  --home-c0: #4cc47f;
+  --home-c1: #f0a050;
+  --home-c2: #6aa6f5;
+  --home-c3: #a3a8b8;
+}
+
+.home-card { padding-top: 34px; }
+
+.home-brand {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(var(--text-given-rgb), 0.45);
+}
+
+/* ── 프로필 ── */
+.home-profile { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 14px; }
+.home-avatar {
+  width: 64px;
+  height: 64px;
+  border: none;
+  border-radius: 999px;
+  background: var(--cell-selected);
+  box-shadow: 0 0 0 3px var(--surface-solid), 0 0 0 5px var(--text-input);
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: transform 0.1s ease;
+}
+.home-avatar:active { transform: scale(0.95); }
+.home-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  max-width: 100%;
+  padding: 2px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-given);
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.home-name:hover { background: var(--surface-1); }
+/* 긴 닉네임은 한 줄로 자른다 */
+.home-name-text { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.home-name-edit { flex: none; font-size: 13px; color: rgba(var(--text-given-rgb), 0.35); }
+.home-name-input {
+  width: 170px;
+  height: 32px;
+  padding: 0 10px;
+  border: 2px solid var(--text-input);
+  border-radius: 8px;
+  background: var(--surface-solid);
+  color: var(--text-given);
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.home-meta { margin: 2px 0 0; font-size: 12px; font-weight: 600; color: rgba(var(--text-given-rgb), 0.5); font-variant-numeric: tabular-nums; }
+
+.home-avatar-picker {
+  position: absolute;
+  z-index: 5;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(6, 36px);
+  gap: 4px;
+  padding: 8px;
+  border-radius: 14px;
+  background: var(--surface-solid);
+  box-shadow: 0 10px 30px rgba(20, 24, 40, 0.22);
+}
+.home-avatar-picker[hidden] { display: none; }
+.home-avatar-option {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+.home-avatar-option:hover { background: var(--surface-1); }
+
+.home-stack { gap: 10px; }
+.home-numbers { margin-bottom: 2px; }
+
+/* ── 오늘의 데일리: 게임 아이콘 + 모드 동그라미 ── */
+.home-shelf { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.home-tile {
+  --chip: 28px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 6px;
+  border-radius: 14px;
+  background: var(--surface-solid);
+  box-shadow: 0 2px 6px rgba(20, 24, 40, 0.08);
+}
+.home-tile-icon {
+  flex: none;
+  width: 28px;
+  height: var(--chip);
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+}
+.home-tile-icon:hover { background: var(--surface-1); }
+.home-chips { flex: 1; display: flex; justify-content: flex-end; gap: 3px; }
+.home-chip {
+  width: var(--chip);
+  height: var(--chip);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--surface-1);
+  color: rgba(var(--text-given-rgb), 0.6);
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 0.08s ease;
+}
+.home-chip:active { transform: scale(0.92); }
+.home-chip[data-status="solved"]  { background: var(--text-input); color: #fff; }
+.home-chip[data-status="timeout"] { background: var(--conflict); color: #fff; }
+.home-chip[data-status="playing"] { background: var(--playing-bg); color: var(--playing-text); box-shadow: inset 0 0 0 2px var(--playing-text); }
+
+/* ── 플레이 비율 · 최근 1주 ── */
+.home-section-title { margin: 0; font-size: 12px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.7); text-align: left; }
+.home-ratio-bar { display: flex; gap: 2px; height: 12px; margin-top: -4px; border-radius: 6px; overflow: hidden; background: var(--surface-1); }
+.home-ratio-seg { flex: 0 1 0; min-width: 4px; }
+.home-ratio-seg[hidden] { display: none; }
+.home-ratio-legend { display: flex; justify-content: space-between; margin-top: -4px; font-size: 12px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.7); font-variant-numeric: tabular-nums; }
+.home-ratio-item { display: inline-flex; align-items: center; gap: 3px; }
+.home-ratio-dot { width: 8px; height: 8px; border-radius: 2px; }
+.home-c0 { background: var(--home-c0); }
+.home-c1 { background: var(--home-c1); }
+.home-c2 { background: var(--home-c2); }
+.home-c3 { background: var(--home-c3); }
+
+.home-week-head { display: flex; align-items: center; justify-content: space-between; }
+.home-week-scale { display: inline-flex; align-items: center; gap: 2px; font-size: 10px; color: rgba(var(--text-given-rgb), 0.45); }
+.home-week-swatch { width: 9px; height: 9px; border-radius: 2px; }
+.home-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: -4px; }
+.home-week-col { display: flex; flex-direction: column; gap: 3px; }
+.home-week-dow { font-size: 10px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.4); }
+.home-week-cell {
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.home-week-cell.is-today { box-shadow: inset 0 0 0 2px var(--text-sel); }
+.home-lv0 { background: rgba(var(--text-given-rgb), 0.07); }
+.home-lv1 { background: color-mix(in srgb, var(--text-input) 35%, transparent); color: var(--text-sel); }
+.home-lv2 { background: color-mix(in srgb, var(--text-input) 60%, transparent); }
+.home-lv3 { background: color-mix(in srgb, var(--text-input) 80%, transparent); }
+.home-lv4 { background: var(--text-input); }
+
+/* ── 낮은 화면 (index.html의 단계와 같게) ── */
+@media (max-height: 680px) {
+  .home-card { padding-top: 24px; }
+  .home-brand { margin-bottom: 6px; }
+  .home-avatar { width: 52px; height: 52px; font-size: 28px; margin-bottom: 6px; }
+  .home-name { font-size: 20px; }
+  .home-profile { margin-bottom: 10px; }
+  .home-avatar-picker { top: 100px; }
+  .home-stack { gap: 9px; }
+}
+@media (max-height: 560px) {
+  .home-card { padding-top: 16px; }
+  .home-brand { display: none; }
+  .home-avatar { width: 44px; height: 44px; font-size: 24px; margin-bottom: 4px; box-shadow: 0 0 0 2px var(--surface-solid), 0 0 0 4px var(--text-input); }
+  .home-name { font-size: 18px; }
+  .home-meta { font-size: 11px; }
+  .home-profile { margin-bottom: 8px; }
+  .home-avatar-picker { top: 70px; }
+  .home-stack { gap: 7px; }
+  .home-tile { --chip: 24px; padding: 4px 5px; }
+  .home-week-cell { height: 20px; font-size: 10px; }
+}
+@media (max-width: 340px) {
+  .home-tile { --chip: 24px; }
+  .home-tile-icon { width: 24px; font-size: 17px; }
+  .home-chip { font-size: 12px; }
+}
+
+/* 하단 점 — 홈은 네모 점 */
+.hub-dot-home::before { border-radius: 2px; }

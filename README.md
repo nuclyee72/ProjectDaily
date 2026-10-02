@@ -2,7 +2,7 @@
 
 하루 한 판 퍼즐 네 개를 한 사이트에서.
 
-- **메인(허브):** https://nuclyee72.github.io/ProjectDaily/ — 게임 카드를 좌우로 넘긴다
+- **메인(허브):** https://nuclyee72.github.io/ProjectDaily/ — 맨 왼쪽 홈 카드 + 게임 카드를 좌우로 넘긴다
 - **게임:** `/ProjectDaily/DailySudoku/` · `/ProjectDaily/DailyTrilateral/` · `/ProjectDaily/DailyWordship/` · `/ProjectDaily/DailyBWSweeper/`
 
 ## 구조
@@ -10,6 +10,7 @@
 ```
 ProjectDaily/                  ← 이 레포 (허브)
 ├─ index.html                  ← 메인 화면. 카드 안에서 지난 퍼즐 · 자유 연습 모드 · 통계까지
+├─ home.js · home.css          ← 홈 카드(#home): 프로필(아바타·닉네임·전체 기록) · 데일리 바로 시작 · 플레이 비율 · 최근 1주
 ├─ about.html · privacy.html   ← 소개 · 개인정보처리방침 (허브 카드 아래 링크, 공용 스타일 page.css)
 ├─ scripts/assemble-site.mjs   ← 허브 + 게임들을 배포용 사이트 하나로 조립
 ├─ tests/                      ← 브라우저 자동 테스트 (Playwright)
@@ -85,4 +86,4 @@ npm test             # 조립 → /ProjectDaily/ 경로로 로컬 서빙 → 브
 
 - `hub.test.cjs` — 스와이프 · 딥링크 · 지난 퍼즐(카드 안) → 게임 · "메인 화면" → 허브 · 뒤로가기 · 다크 모드 공유 · 직접 접속 · 아침 6시 날짜 갱신 · 소개/개인정보처리방침 링크
 - `stats.test.cjs` — 허브 통계가 게임 통계창과 같은지 (숫자 · 분포 · 달력 공유 문구 · 오늘 결과 공유 문구), 자유 연습 모드 고르기
-- `layout.test.cjs` — 메인·모든 하위 화면이 320×480 ~ 1280×720에서 카드 폭 그대로 · 스크롤 없이 들어가는지 (6줄 달 기준)
+- `layout.test.cjs` — 홈 · 메인·모든 하위 화면이 320×480 ~ 1280×720에서 카드 폭 그대로 · 스크롤 없이 들어가는지 (6줄 달 기준)

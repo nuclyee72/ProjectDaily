@@ -16,12 +16,27 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
 
   // 1. 허브
   await page.goto(BASE);
-  check((await page.locator('.hub-slide').count()) === 4, '허브: 게임 카드 4장');
+  check((await page.locator('.hub-slide').count()) === 5, '허브: 홈 + 게임 카드 4장');
+  check(new URL(page.url()).hash === '#home', `첫 화면 = 홈 (${new URL(page.url()).hash})`);
   check((await page.locator('.daily-card-status').allTextContents()).every((t) => t === '플레이 전'), '허브: 상태 배지 모두 "플레이 전"');
   await page.screenshot({ path: path.join(SHOTS, '1-hub-mobile.png') });
 
+  // 1-1. 홈: 모드 동그라미 9개(바로 시작 링크) · 닉네임 바꾸기 · 아이콘 → 게임 카드
+  const chips = await page.locator('#home .home-chip').evaluateAll((as) => as.map((a) => [a.textContent, a.dataset.status, a.getAttribute('href')]));
+  check(chips.length === 9 && chips.every(([, s]) => s === 'new'), `홈: 동그라미 9개 모두 플레이 전 (${chips.map((c) => c[0]).join('')})`);
+  check(chips[0][2] === 'DailySudoku/?open=btn-daily-standard' && chips[6][0] === 'I', '홈: 동그라미 = 그 데일리 바로 시작 링크 · 사자성어 I');
+  await page.click('#home .home-name');
+  await page.fill('#home .home-name-input', '퍼즐왕');
+  await page.keyboard.press('Enter');
+  check(await page.textContent('#home .home-name-text') === '퍼즐왕'
+    && (await page.evaluate(() => JSON.parse(localStorage.getItem('daily-hub:profile')).name)) === '퍼즐왕', '홈: 닉네임 바꾸기 → 저장');
+  check(new URL(page.url()).hash === '#home', '홈: 닉네임 입력 중 방향키·Enter가 카드를 넘기지 않음');
+  await page.click('#home .home-tile-icon >> nth=2');
+  await page.waitForTimeout(600);
+  check(new URL(page.url()).hash === '#wordship', `홈: 🚢 아이콘 → 워드십 카드 (${new URL(page.url()).hash})`);
+
   // 2. 스와이프(가로 스크롤) → 두 번째 게임
-  await page.evaluate(() => document.getElementById('hub-track').scrollTo({ left: innerWidth, behavior: 'instant' }));
+  await page.evaluate(() => document.getElementById('hub-track').scrollTo({ left: innerWidth * 2, behavior: 'instant' }));
   await page.waitForTimeout(300);
   check(new URL(page.url()).hash === '#trilateral', `스와이프 후 주소 #trilateral (${new URL(page.url()).hash})`);
   await page.screenshot({ path: path.join(SHOTS, '2-hub-swiped.png') });
@@ -36,7 +51,7 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
   await page.click('#btn-go-landing');
   await page.waitForURL(/\/ProjectDaily\/#trilateral$/);
   await page.waitForTimeout(200);
-  check(await page.evaluate(() => Math.round(document.getElementById('hub-track').scrollLeft / innerWidth)) === 1, '메인 화면 → 허브의 삼각관계 카드로 복귀');
+  check(await page.evaluate(() => Math.round(document.getElementById('hub-track').scrollLeft / innerWidth)) === 2, '메인 화면 → 허브의 삼각관계 카드로 복귀 (홈 다음 두 번째 게임)');
   check(await page.locator('#trilateral .daily-card-status').first().textContent().then((t) => t === '진행 중'), '허브: 삼각관계 스탠다드 "진행 중" 반영');
   // 휴대폰 "뒤로"가 방금 나온 게임으로 되돌아가지 않아야 함
   await page.goBack().catch(() => {});
@@ -151,7 +166,7 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
   // 10. 데스크톱 화면
   const ctx3 = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const p3 = await ctx3.newPage();
-  await p3.goto(BASE);
+  await p3.goto(BASE + '#sudoku');
   await p3.screenshot({ path: path.join(SHOTS, '10-hub-desktop.png') });
   await p3.keyboard.press('ArrowRight');
   await p3.waitForTimeout(600);

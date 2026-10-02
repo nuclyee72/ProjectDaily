@@ -13,7 +13,31 @@ const VIEWS = [['메인', null], ['지난 퍼즐', null], ['자유 연습', null
     const p = await ctx.newPage();
     const errs = []; p.on('pageerror', (e) => errs.push(e.message));
     await p.clock.setFixedTime(new Date('2027-01-15T12:00:00+09:00'));
+    // 홈은 기록이 있을 때 가장 길다 — 긴 닉네임 · 세 자리 판 수
+    await p.addInitScript(() => {
+      localStorage.setItem('daily-hub:profile', JSON.stringify({ avatar: '🐙', name: '가나다라마바사아자차카타' }));
+      const results = {};
+      for (let d = 1; d <= 31; d++) for (const m of ['01', '12']) results[`2026-${m}-${String(d).padStart(2, '0')}`] = { status: d % 4 ? 'solved' : 'failed', attempt: 3 };
+      localStorage.setItem('wordship:stats', JSON.stringify({ results }));
+      localStorage.setItem('trilateral:stats', JSON.stringify({ results }));
+    });
     await p.goto(BASE);
+    {
+      await p.evaluate(() => document.getElementById('home').scrollIntoView({ behavior: 'instant', inline: 'start' }));
+      await p.waitForTimeout(150);
+      const r = await p.locator('#home .landing-card').evaluate((c) => {
+        const cr = c.getBoundingClientRect(); const slide = c.parentElement;
+        const dots = document.getElementById('hub-dots').getBoundingClientRect();
+        const over = [...c.querySelectorAll('.home-tile, .home-ratio-legend, .home-week-head')].some((e) => e.scrollWidth > e.clientWidth + 1);
+        return { w: cr.width, h: Math.round(cr.height), scroll: c.scrollHeight - c.clientHeight, slide: slide.scrollHeight - slide.clientHeight, top: Math.round(cr.top), gap: Math.round(dots.top - cr.bottom), over };
+      });
+      const w0 = await p.locator('#sudoku .landing-card').evaluate((e) => e.getBoundingClientRect().width);
+      const ok = Math.abs(r.w - w0) < 0.5 && r.scroll <= 0 && r.slide <= 0 && r.top >= 0 && r.gap >= 0 && !r.over;
+      if (!ok) { bad++; console.log(`FAIL ${w}x${h} home: 폭 ${Math.round(r.w)} (게임 카드 ${Math.round(w0)}) 높이 ${r.h} 위 ${r.top} 점까지 ${r.gap} 가로 넘침 ${r.over}`); }
+      worst['홈'] = Math.max(worst['홈'] ?? 0, r.h);
+      if (w === 390 && h === 844) await p.screenshot({ path: path.join(SHOTS, 'view-home.png') });
+      if (w === 320 && h === 480) await p.screenshot({ path: path.join(SHOTS, 'view-home-320x480.png') });
+    }
     for (const slug of ['sudoku', 'trilateral', 'wordship', 'bwsweeper']) {
       await p.evaluate((s) => { location.hash = s; }, slug);
       await p.evaluate((s) => document.getElementById(s).scrollIntoView({ behavior: 'instant', inline: 'start' }), slug);
