@@ -1,6 +1,6 @@
 /**
  * home.js — 허브 맨 왼쪽 홈 카드 (#home).
- * 프로필(아바타 · 닉네임 · 전체 기록) + 오늘의 데일리 바로 시작 + 플레이 비율 + 최근 1주 활동을 한 카드에.
+ * 프로필(아바타 · 닉네임 · 판 수 · 연속 · 최장) + 오늘의 데일리 바로 시작 + 플레이 비율 + 최근 1주 활동을 한 카드에.
  * 모든 값은 각 게임이 남긴 localStorage 기록에서 계산한다 — 홈이 새로 저장하는 건 프로필(아바타·닉네임)뿐.
  * index.html의 인라인 스크립트가 게임 목록과 공용 함수를 넘겨 DailyHome.build(ctx)로 만든다.
  */
@@ -31,14 +31,12 @@
     const perGame = GAMES.map(() => 0);
     const perDay = new Map(); // 날짜 → 그날 끝낸 판 수
     let plays = 0;
-    let wins = 0;
     GAMES.forEach((game, gi) => {
       for (const [mode] of game.modes) {
         const results = readJSON(game.statsKey(mode))?.results ?? {};
-        for (const [date, r] of Object.entries(results)) {
+        for (const date of Object.keys(results)) {
           plays++;
           perGame[gi]++;
-          if (r?.status === 'solved') wins++;
           perDay.set(date, (perDay.get(date) ?? 0) + 1);
         }
       }
@@ -59,7 +57,6 @@
     }
     return {
       plays,
-      winRate: plays ? Math.round((wins / plays) * 100) : 0,
       streak,
       maxStreak,
       since: days[0] ?? null,
@@ -160,7 +157,6 @@
       return strong;
     };
     const nPlays = num('판');
-    const nWin = num('승률');
     const nStreak = num('연속');
     const nMax = num('최장');
 
@@ -246,7 +242,6 @@
       paintProfile();
       paintMeta(stats);
       nPlays.textContent = stats.plays;
-      nWin.textContent = `${stats.winRate}%`;
       nStreak.textContent = `${stats.streak}일`;
       nMax.textContent = `${stats.maxStreak}일`;
 
