@@ -1,4 +1,4 @@
-// 데일리 농장 규칙 (farm/data.js · farm/engine.js) — 브라우저 없이 Node에서 바로 돌린다.
+// 데일리 농장 규칙 (farm/data.js · farm/engine.js) + 도트 (farm/sprites.js) — 브라우저 없이 Node에서 바로 돌린다.
 // 기획 docs/farm-plan.md "검증"의 규칙 항목. 확률은 10만 번 굴려 ±0.5%p 안인지 본다.
 const fs = require('fs');
 const path = require('path');
@@ -9,10 +9,10 @@ const REPO = path.resolve(__dirname, '..');
 function load() {
   const ctx = { window: {} };
   vm.createContext(ctx);
-  for (const f of ['farm/data.js', 'farm/engine.js']) vm.runInContext(fs.readFileSync(path.join(REPO, f), 'utf8'), ctx, { filename: f });
+  for (const f of ['farm/data.js', 'farm/engine.js', 'farm/sprites.js']) vm.runInContext(fs.readFileSync(path.join(REPO, f), 'utf8'), ctx, { filename: f });
   return ctx.window.DailyFarm;
 }
-const { data: D, engine: E } = load();
+const { data: D, engine: E, sprites: S } = load();
 const E2 = load().engine; // 다른 실행에서도 시드 결과가 같은지
 
 const H = E.H;
@@ -369,6 +369,35 @@ function dist(counts, expect, total, tol = 0.005) {
   t.sp = 0;
   const day3 = days.find((d) => E.shopOffers(d).sp.includes('mat'));
   check(E.buyShop(t, 'sp', 'mat', day3, rng) === 'sp', 'SP가 모자라면 못 삼');
+}
+
+// ── 도트 (음영 계산까지. 캔버스로 그리는 건 화면 테스트에서) ──
+{
+  const names = S.names();
+  check(names.length === 242 && new Set(names).size === 242, `도트 242장 (기타 32 · 작물 55 · 다 큰 작물 55 · 요리 100) (${names.length})`);
+  const bad = [];
+  for (const n of names) {
+    const d = S.def(n);
+    if (!d) { bad.push(n + ' 정의 없음'); continue; }
+    for (const L of d.layers) {
+      const w = L.rows[0].length;
+      if (L.rows.some((r) => r.length !== w) || L.x + w > d.w || L.y + L.rows.length > d.h) bad.push(n + ' 크기');
+    }
+    const p = S.pixels(n);
+    const holes = [];
+    d.layers.forEach((L) => L.rows.forEach((r, y) => [...r].forEach((ch, x) => {
+      if (ch !== '.' && !/^#[0-9a-f]{6}$/.test(p.px[L.y + y][L.x + x] || '')) holes.push(`${x},${y}:${ch}`);
+    })));
+    if (holes.length) bad.push(n + ' 색 없음 ' + holes.slice(0, 3).join(' '));
+  }
+  check(bad.length === 0, `픽셀맵: 줄 길이가 같고 크기 안, 모든 픽셀에 색 ${bad.slice(0, 5).join(' / ')}`);
+  check(D.CROPS.every((c) => S.def('crop:' + c.id).w === 16 && S.def('ready:' + c.id).h === 20) && D.DISHES.every((d) => S.def('dish:' + d.id).h === 16),
+    '작물 16×16 · 다 큰 작물 16×20 (줄기 위에 작물) · 요리 16×16');
+  const r = S.ramp('#e53935');
+  check(r.length === 7 && r[3] === '#e53935' && new Set(r).size === 7, '음영 7단계 (가운데가 바탕색)');
+  const tomato = S.pixels('crop:tomato').px.flat().filter(Boolean);
+  check(new Set(tomato).size >= 10, `토마토 한 장에 색 ${new Set(tomato).size}가지 (음영 단계 + 외곽선 섞임)`);
+  check(S.TIER_COLORS.length === 4, '등급 테두리 색 4개');
 }
 
 finish();
