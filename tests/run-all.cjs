@@ -2,7 +2,7 @@
 const { spawnSync } = require('child_process');
 const path = require('path');
 
-const TESTS = ['hub.test.cjs', 'stats.test.cjs', 'layout.test.cjs'];
+const TESTS = ['farm-engine.test.cjs', 'hub.test.cjs', 'stats.test.cjs', 'layout.test.cjs'];
 let failed = 0;
 for (const t of TESTS) {
   console.log(`\n━━━ ${t} ━━━`);
