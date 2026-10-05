@@ -1,0 +1,392 @@
+/* farm/farm.css — 데일리 농장 카드 (#farm). 카드 · 버튼 · 탭 공통 모양은 index.html 스타일을 그대로 쓴다.
+   카드 안은 스크롤하지 않는다: 본문 높이(--farm-body)와 쪽마다 줄 수(--farm-rows …)를 화면 높이 단계마다 정한다 (index.html 단계와 같게). */
+.landing-card.farm-card {
+  --farm-body: 384px;
+  --farm-rows: 5;
+  --farm-panel-rows: 6;
+  --farm-cols: 4;
+  --farm-chips: 12;
+  --farm-accent: var(--text-input);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 18px 18px;
+  text-align: left;
+}
+.farm-card img.px { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+:where(.farm-card) button { font: inherit; color: inherit; }
+
+/* ── 머리 · 지갑 · 탭 ── */
+.farm-head { display: flex; align-items: center; gap: 6px; }
+.farm-head .farm-title { flex: 1; min-width: 0; }
+.farm-title { margin: 0; font-family: 'Outfit', 'Inter', sans-serif; font-size: 21px; font-weight: 700; color: var(--text-given); white-space: nowrap; }
+.farm-season {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface-1);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(var(--text-given-rgb), 0.65);
+  white-space: nowrap;
+}
+.farm-season.is-ending { background: var(--surface-danger); color: var(--conflict); }
+
+.farm-wallet { display: flex; align-items: center; gap: 4px; }
+.farm-coin {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 6px 0 4px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-1);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-given);
+  font-variant-numeric: tabular-nums;
+}
+.farm-coin img { width: 16px; height: 16px; flex: none; }
+.farm-coin-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+button.farm-coin { cursor: pointer; }
+button.farm-coin:hover { background: var(--surface-1-hover); }
+.farm-bag {
+  flex: none;
+  width: 34px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 10px;
+  background: var(--surface-solid);
+  box-shadow: 0 2px 6px rgba(20, 24, 40, 0.12);
+  cursor: pointer;
+}
+.farm-bag img { width: 24px; height: 24px; }
+
+.farm-tabs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; }
+.farm-tab {
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(var(--text-given-rgb), 0.55);
+  cursor: pointer;
+}
+.farm-tab img { width: 24px; height: 24px; }
+.farm-tab:hover { background: var(--surface-1); }
+.farm-tab[aria-current="true"] { background: var(--cell-selected); color: var(--text-sel); }
+
+/* ── 본문 ── */
+.farm-body {
+  position: relative;
+  height: var(--farm-body);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+.farm-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+.farm-row > .farm-btn { margin-left: auto; }
+.farm-row > .farm-count + .farm-btn { margin-left: 0; }
+.farm-hint { margin: 0; font-size: 11px; line-height: 1.4; color: rgba(var(--text-given-rgb), 0.5); }
+.farm-empty { padding: 18px 0; text-align: center; }
+.farm-alert { margin: 0; padding: 6px 10px; border-radius: 10px; background: var(--surface-danger); color: var(--conflict); font-size: 11px; font-weight: 700; }
+
+.farm-count { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 800; color: var(--text-given); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.farm-count img { width: 16px; height: 16px; }
+
+.farm-btn {
+  flex: none;
+  height: 30px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 9px;
+  background: var(--surface-1);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.farm-btn:hover { background: var(--surface-1-hover); }
+.farm-btn:disabled { opacity: 0.38; cursor: default; background: var(--surface-1); }
+.farm-lock-btn { padding: 0 7px; }
+.landing-btn.farm-wide { flex: none; width: 100%; height: 42px; margin: 0; }
+
+.farm-seg { flex: none; min-width: 0; }
+.farm-row > .farm-seg { flex: 1; }
+.farm-seg button { font-size: 11px; height: 24px; }
+.farm-toggle {
+  flex: none;
+  height: 30px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 9px;
+  background: var(--surface-1);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(var(--text-given-rgb), 0.6);
+  cursor: pointer;
+}
+.farm-toggle.is-on { background: var(--farm-accent); color: #fff; }
+
+.farm-pager { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 24px; margin-top: auto; }
+.farm-page-btn { width: 30px; height: 24px; border: none; border-radius: 8px; background: var(--surface-1); font-size: 15px; cursor: pointer; }
+.farm-page-btn:disabled { opacity: 0.3; cursor: default; }
+.farm-page-n { font-size: 11px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.55); font-variant-numeric: tabular-nums; }
+
+/* 목록 한 줄 (높이 고정 — 쪽마다 줄 수를 CSS 변수로 정하므로) */
+.farm-list { display: flex; flex-direction: column; gap: 6px; }
+.farm-item {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 8px 0 6px;
+  border: none;
+  border-radius: 12px;
+  background: var(--surface-solid);
+  box-shadow: 0 1px 4px rgba(20, 24, 40, 0.08);
+  text-align: left;
+}
+button.farm-item { width: 100%; cursor: pointer; }
+button.farm-item:hover { background: var(--surface-solid-hover); }
+.farm-item.is-picked { box-shadow: inset 0 0 0 2px var(--farm-accent); }
+.farm-item-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.farm-item-text strong, .farm-item-text > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.farm-item-text strong { font-size: 13px; font-weight: 700; color: var(--text-given); }
+.farm-item-text > span { font-size: 11px; color: rgba(var(--text-given-rgb), 0.55); }
+.farm-item .farm-btn { height: 28px; padding: 0 8px; }
+.farm-icon { width: 32px; height: 32px; flex: none; border: 2px solid transparent; border-radius: 8px; box-sizing: content-box; }
+.farm-icon-lg { width: 48px; height: 48px; border: 2px solid transparent; border-radius: 10px; box-sizing: content-box; }
+.farm-badge { margin-left: 5px; padding: 0 5px; border-radius: 6px; background: var(--playing-bg); color: var(--playing-text); font-size: 10px; vertical-align: 1px; }
+
+/* ── 농장: 밭 4×2 ── */
+.farm-plots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.farm-plot {
+  --tile: 64px;
+  position: relative;
+  height: calc(var(--tile) * 1.25 + 16px);
+  padding: calc(var(--tile) / 4) 0 0;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+}
+.farm-plot:hover { background: var(--surface-1); }
+.farm-ground { width: var(--tile); height: var(--tile); margin: 0 auto; border-radius: 6px; }
+.farm-plant { position: absolute; left: 50%; top: calc(var(--tile) / 4); width: var(--tile); height: var(--tile); transform: translateX(-50%); }
+.farm-plant.is-ready { top: 0; height: calc(var(--tile) * 1.25); animation: farm-bob 1.6s ease-in-out infinite; }
+.farm-lock { position: absolute; left: 50%; top: calc(var(--tile) / 2); width: 32px; height: 32px; transform: translateX(-50%); }
+.farm-plot.is-locked .farm-ground { opacity: 0.55; }
+.farm-plot-label {
+  display: block;
+  margin-top: 1px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(var(--text-given-rgb), 0.55);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.farm-plot.is-ready .farm-plot-label { color: var(--farm-accent); }
+.farm-plot.is-empty .farm-plot-label { color: rgba(var(--text-given-rgb), 0.4); }
+@keyframes farm-bob { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -2px); } }
+
+/* ── 탐험 ── */
+.farm-scene {
+  position: relative;
+  height: 64px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #bfe3f5 0%, #dff1fa 55%, #7fb357 55%, #6a9a4a 100%);
+  overflow: hidden;
+}
+[data-theme="dark"] .farm-scene { background: linear-gradient(180deg, #1b2a44 0%, #2a3b5a 55%, #3d6230 55%, #2f4d25 100%); }
+.farm-walker { position: absolute; bottom: 4px; left: 10%; width: 48px; height: 48px; animation: farm-stroll 9s ease-in-out infinite alternate; }
+.farm-walk-frame { position: absolute; inset: 0; width: 48px; height: 48px; opacity: 0; animation: farm-walk 0.75s steps(1) infinite; }
+.farm-walk-frame:nth-child(2) { animation-delay: -0.25s; }
+.farm-walk-frame:nth-child(3) { animation-delay: -0.5s; }
+@keyframes farm-walk { 0% { opacity: 1; } 33.33% { opacity: 0; } }
+@keyframes farm-stroll { from { left: 6%; } to { left: calc(94% - 48px); } }
+.farm-bar { height: 10px; border-radius: 999px; background: var(--surface-1); overflow: hidden; }
+.farm-bar-fill { display: block; height: 100%; border-radius: 999px; background: var(--farm-accent); transition: width 0.4s ease; }
+.farm-explore-time, .farm-explore-boost { margin: 0; font-size: 12px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.7); font-variant-numeric: tabular-nums; }
+.farm-explore-boost { color: var(--playing-text); }
+.farm-explore-boost:empty { display: none; }
+
+/* ── 제작 ── */
+.farm-have { justify-content: space-between; padding: 0 4px; }
+.farm-craft-side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.farm-craft .farm-btn { height: 22px; padding: 0 8px; font-size: 11px; }
+.farm-cost { display: flex; gap: 5px; font-size: 10px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.65); font-variant-numeric: tabular-nums; }
+.farm-cost span { display: inline-flex; align-items: center; gap: 1px; }
+.farm-cost img { width: 16px; height: 16px; }
+.farm-cost .is-short { color: var(--conflict); }
+
+/* ── 요리 ── */
+.farm-ings { display: flex; gap: 6px; font-size: 10px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.6); }
+.farm-ings > span { display: inline-flex; align-items: center; gap: 1px; }
+.farm-ings img { width: 16px; height: 16px; }
+.farm-ings .is-short { color: var(--conflict); }
+.farm-cook-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.6); }
+.farm-cook { display: flex; flex-direction: column; gap: 8px; }
+.farm-cook-ing { display: flex; flex-direction: column; gap: 4px; }
+.farm-cook-name { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--text-given); }
+.farm-cook-name img { width: 16px; height: 16px; }
+.farm-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.farm-chip {
+  min-width: 32px;
+  height: 22px;
+  padding: 0 5px;
+  border: none;
+  border-radius: 7px;
+  background: var(--surface-1);
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.farm-chip.is-on { background: var(--farm-accent); color: #fff; }
+.farm-odds { margin: 0; font-size: 12px; font-weight: 700; color: rgba(var(--text-given-rgb), 0.7); }
+.farm-result { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0; }
+.farm-result strong { font-size: 16px; color: var(--text-given); }
+.farm-stars { display: flex; gap: 6px; font-size: 30px; line-height: 1; }
+.farm-star { color: rgba(var(--text-given-rgb), 0.2); animation: farm-pop 0.4s ease both; }
+.farm-star.is-on { color: #f5b301; text-shadow: 0 2px 6px rgba(245, 179, 1, 0.45); }
+@keyframes farm-pop { from { transform: scale(0.2); opacity: 0; } 70% { transform: scale(1.25); } to { transform: scale(1); opacity: 1; } }
+
+/* ── 도감 ── */
+.farm-codex-sum { margin: 0; font-family: 'Outfit', 'Inter', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-given); }
+.farm-codex { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.farm-codex-cell {
+  height: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 4px;
+  border-radius: 12px;
+  background: var(--surface-solid);
+  box-shadow: 0 1px 4px rgba(20, 24, 40, 0.08);
+  min-width: 0;
+}
+.farm-codex-cell > * { flex: none; }
+.farm-codex-cell strong { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 11px; color: var(--text-given); }
+.farm-codex-stars { font-size: 12px; font-weight: 700; color: #f5b301; }
+.farm-codex-cell .farm-btn { height: 22px; padding: 0 6px; font-size: 10px; }
+
+/* ── NP 내역 ── */
+.farm-np { gap: 4px; }
+.farm-np-row { display: flex; justify-content: space-between; padding: 6px 10px; border-radius: 10px; background: var(--surface-1); font-size: 13px; color: var(--text-given); }
+.farm-np-row:last-child { background: var(--cell-selected); color: var(--text-sel); }
+
+/* ── 가방 칸 ── */
+.farm-grid { display: grid; grid-template-columns: repeat(var(--farm-cols), 1fr); gap: 6px; }
+.farm-cell, .farm-got-cell {
+  height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border-radius: 10px;
+  background: var(--surface-1);
+  font-size: 10px;
+  color: rgba(var(--text-given-rgb), 0.6);
+  min-width: 0;
+}
+.farm-cell .farm-icon, .farm-got-cell .farm-icon { width: 24px; height: 24px; border-radius: 6px; }
+.farm-cell strong, .farm-got-cell strong { font-size: 12px; color: var(--text-given); font-variant-numeric: tabular-nums; }
+.farm-got { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.farm-got-cell { height: 72px; }
+.farm-got-cell .farm-icon { width: 32px; height: 32px; }
+.farm-got-cell.is-hidden { background: var(--playing-bg); box-shadow: inset 0 0 0 2px var(--playing-text); animation: farm-glow 1.2s ease-in-out infinite alternate; }
+@keyframes farm-glow { to { box-shadow: inset 0 0 0 2px var(--playing-text), 0 0 12px rgba(224, 178, 76, 0.6); } }
+
+.farm-detail { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0 4px; font-size: 13px; color: var(--text-given); }
+.farm-tier-name { font-size: 11px; color: rgba(var(--text-given-rgb), 0.5); }
+.farm-notice { margin: 4px 0; font-family: 'Outfit', 'Inter', sans-serif; font-size: 22px; font-weight: 700; text-align: center; color: var(--text-given); }
+
+/* ── 카드를 덮는 판 · 알림 ── */
+.farm-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 16px 14px;
+  border-radius: inherit;
+  background: var(--surface-solid);
+  box-shadow: 0 0 0 1px rgba(var(--text-given-rgb), 0.06);
+}
+.farm-panel[hidden] { display: none; }
+.farm-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+.farm-panel-title { margin: 0; font-family: 'Outfit', 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--text-given); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.farm-panel-close { flex: none; width: 30px; height: 28px; border: none; border-radius: 8px; background: var(--surface-1); cursor: pointer; }
+.farm-panel .farm-pager { margin-top: 0; }
+.farm-panel > .landing-btn.farm-wide { margin-top: auto; }
+
+.farm-toast {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 12px;
+  z-index: 20;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(20, 24, 32, 0.88);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+.farm-toast.is-on { opacity: 1; transform: none; }
+
+/* ── 낮은 화면 (index.html의 단계와 같게) ── */
+@media (max-height: 680px) {
+  .landing-card.farm-card { --farm-body: 322px; --farm-rows: 4; --farm-panel-rows: 5; gap: 6px; padding: 18px 16px 14px; }
+  .farm-title { font-size: 19px; }
+  .farm-tab { height: 40px; }
+  .farm-codex-cell { height: 104px; }
+  .farm-scene { height: 56px; }
+}
+@media (max-height: 560px) {
+  .landing-card.farm-card { --farm-body: 276px; --farm-rows: 3; --farm-panel-rows: 4; --farm-chips: 8; gap: 6px; padding: 14px 14px 12px; }
+  .farm-title { font-size: 17px; }
+  .farm-tab { height: 38px; font-size: 9px; }
+  .farm-tab img { width: 20px; height: 20px; }
+  .farm-body { gap: 6px; }
+  .farm-body[data-tab="farm"] .farm-hint { display: none; }
+  .farm-codex-cell { height: 86px; padding: 4px 2px; gap: 2px; }
+  .farm-codex-cell .farm-icon-lg { width: 32px; height: 32px; }
+  .farm-scene { height: 52px; }
+  .farm-panel { padding: 12px 12px 10px; gap: 6px; }
+  .landing-btn.farm-wide { height: 38px; }
+}
+@media (max-width: 370px), (max-height: 680px) {
+  .farm-plot { --tile: 48px; }
+  .farm-lock { width: 24px; height: 24px; }
+}
+@media (max-width: 340px) {
+  .farm-coin { font-size: 11px; padding: 0 4px 0 3px; }
+  .farm-item .farm-btn { padding: 0 6px; }
+}
+
+/* 하단 점 — 농장은 잎 모양 */
+.hub-dot-farm::before { border-radius: 2px 8px; }

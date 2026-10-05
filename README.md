@@ -2,7 +2,7 @@
 
 하루 한 판 퍼즐 네 개를 한 사이트에서.
 
-- **메인(허브):** https://nuclyee72.github.io/ProjectDaily/ — 맨 왼쪽 홈 카드 + 게임 카드를 좌우로 넘긴다
+- **메인(허브):** https://nuclyee72.github.io/ProjectDaily/ — 홈 카드에서 시작해 좌우로 넘긴다 (왼쪽 농장 · 오른쪽 게임 카드)
 - **게임:** `/ProjectDaily/DailySudoku/` · `/ProjectDaily/DailyTrilateral/` · `/ProjectDaily/DailyWordship/` · `/ProjectDaily/DailyBWSweeper/`
 
 ## 구조
@@ -11,6 +11,8 @@
 ProjectDaily/                  ← 이 레포 (허브)
 ├─ index.html                  ← 메인 화면. 카드 안에서 지난 퍼즐 · 자유 연습 모드 · 통계까지
 ├─ home.js · home.css          ← 홈 카드(#home): 프로필(아바타·닉네임·전체 기록) · 데일리 바로 시작 · 플레이 비율 · 최근 1주
+├─ farm/                       ← 데일리 농장 카드(#farm, 홈 왼쪽): data.js 숫자 · engine.js 규칙 · sprites.js 도트 · farm.js/farm.css 화면
+├─ docs/                       ← 농장 기획 문서 (farm-plan.md · farm-GDD.xlsx · 입력 문서들, 배포 안 됨)
 ├─ about.html · privacy.html   ← 소개 · 개인정보처리방침 (허브 카드 아래 링크, 공용 스타일 page.css)
 ├─ scripts/assemble-site.mjs   ← 허브 + 게임들을 배포용 사이트 하나로 조립
 ├─ tests/                      ← 브라우저 자동 테스트 (Playwright)
@@ -23,6 +25,16 @@ ProjectDaily/                  ← 이 레포 (허브)
 
 게임 코드와 매일 퍼즐 생성(cron)은 각 게임 레포에 그대로 있다. 이 레포는 허브 페이지와 배포만 맡는다.
 흑백 지뢰찾기는 퍼즐 파일 없이 날짜를 시드로 브라우저에서 판을 만든다 (cron · `daily/` 폴더 없음).
+
+## 데일리 농장 (`farm/`)
+
+출석과 데일리 결과로 NP를 모아 한 달 시즌 동안 탐험 → 농사/제작 → 요리 → 도감을 채우는 카드. 기획은 `docs/farm-plan.md`.
+
+- 숫자는 `farm/data.js` 한곳에 모여 있다 (`docs/farm-GDD.xlsx`와 같은 값). 규칙은 `engine.js`(DOM 없음, 난수 · 시각을 인자로), 도트는 `sprites.js`(16×16 픽셀맵에 음영을 계산해 그림)
+- 저장: `daily-farm:state`(이번 시즌, 달이 바뀌면 초기화) · `daily-farm:history`(지난 시즌 도감 기록, 홈 프로필 배지)
+- NP는 저장하지 않고 각 게임 통계(`statsKey`)의 이번 달 기록에서 매번 계산한다
+- 카드 안은 스크롤하지 않는다: 긴 목록은 쪽(‹ ›), 가방 · 결과 · 고르기는 카드를 덮는 판
+- 테스트: `tests/farm-engine.test.cjs`(규칙 · 도트, Node) · `tests/farm.test.cjs`(화면, 브라우저) · `layout.test.cjs`(농장 화면 13개 크기 검사)
 
 ## 허브 ↔ 게임 연결
 

@@ -172,19 +172,19 @@
     boostHours: 8,
     boostMult: 2,
     np: [
-      { id: 'boost', name: '탐험 부스트', price: 6, limit: 3 },
-      { id: 'ticket', name: '농사 즉시 완료권', price: 2, limit: 3 },
+      { id: 'boost', name: '탐험 부스트', desc: '8시간 동안 탐험 보상 ×2', price: 6, limit: 3 },
+      { id: 'ticket', name: '농사 즉시 완료권', desc: '자라는 밭 한 칸을 바로 다 키움', price: 2, limit: 3 },
     ],
     spRatio: 10,
     offers: 2,
     apsp: [
-      { id: 'mat', name: '자재 꾸러미', ap: 6, limit: 3, give: { mat: 20 } },
-      { id: 'mat2', name: '고급 자재 꾸러미', ap: 8, limit: 3, give: { mat2: 5 } },
-      { id: 'tickets', name: '완료권 묶음', ap: 16, limit: 2, give: { ticket: 2 } },
-      { id: 'seed1', name: '고급 씨앗 꾸러미', ap: 12, limit: 2, give: { seed: [0, 10, 0, 0] } },
-      { id: 'seed2', name: '희귀 씨앗 꾸러미', ap: 30, limit: 2, give: { seed: [0, 0, 5, 0] } },
-      { id: 'gearBox', name: '장신구 상자', ap: 20, limit: 2, gearLines: [0, 0.8, 0.2] },
-      { id: 'gearBox2', name: '고급 장신구 상자', ap: 40, limit: 1, gearLines: [0, 0, 1] },
+      { id: 'mat', name: '자재 꾸러미', desc: '자재 ×20', ap: 6, limit: 3, give: { mat: 20 } },
+      { id: 'mat2', name: '고급 자재 꾸러미', desc: '고급 자재 ×5', ap: 8, limit: 3, give: { mat2: 5 } },
+      { id: 'tickets', name: '완료권 묶음', desc: '즉시 완료권 ×2', ap: 16, limit: 2, give: { ticket: 2 } },
+      { id: 'seed1', name: '고급 씨앗 꾸러미', desc: '고급 씨앗 ×10', ap: 12, limit: 2, give: { seed: [0, 10, 0, 0] } },
+      { id: 'seed2', name: '희귀 씨앗 꾸러미', desc: '희귀 씨앗 ×5', ap: 30, limit: 2, give: { seed: [0, 0, 5, 0] } },
+      { id: 'gearBox', name: '장신구 상자', desc: '효과 1~2줄 장신구', ap: 20, limit: 2, gearLines: [0, 0.8, 0.2] },
+      { id: 'gearBox2', name: '고급 장신구 상자', desc: '효과 2줄 장신구', ap: 40, limit: 1, gearLines: [0, 0, 1] },
     ],
   };
 

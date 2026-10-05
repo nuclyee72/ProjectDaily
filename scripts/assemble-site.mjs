@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.resolve(process.argv[2] ?? '_site');
 
-const HUB_FILES = ['index.html', 'home.js', 'home.css', 'about.html', 'privacy.html', 'page.css', '.nojekyll', 'icon.svg', 'manifest.webmanifest'];
+const HUB_FILES = ['index.html', 'home.js', 'home.css', 'farm', 'about.html', 'privacy.html', 'page.css', '.nojekyll', 'icon.svg', 'manifest.webmanifest'];
 // 게임마다 사이트에 필요한 것만 (scripts · docs · node_modules 등은 제외)
 const GAME_FILES = {
   DailySudoku:     ['index.html', 'style.css', 'icon.svg', 'manifest.webmanifest', 'src', 'daily'],
@@ -24,7 +24,7 @@ const GAME_FILES = {
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
-for (const f of HUB_FILES) cpSync(path.join(ROOT, f), path.join(OUT, f));
+for (const f of HUB_FILES) cpSync(path.join(ROOT, f), path.join(OUT, f), { recursive: true });
 for (const [game, files] of Object.entries(GAME_FILES)) {
   for (const f of files) cpSync(path.join(ROOT, game, f), path.join(OUT, game, f), { recursive: true });
 }

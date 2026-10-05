@@ -16,7 +16,7 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
 
   // 1. 허브
   await page.goto(BASE);
-  check((await page.locator('.hub-slide').count()) === 5, '허브: 홈 + 게임 카드 4장');
+  check((await page.locator('.hub-slide').count()) === 6, '허브: 농장 + 홈 + 게임 카드 4장');
   check(new URL(page.url()).hash === '#home', `첫 화면 = 홈 (${new URL(page.url()).hash})`);
   check((await page.locator('.daily-card-status').allTextContents()).every((t) => t === '플레이 전'), '허브: 상태 배지 모두 "플레이 전"');
   await page.screenshot({ path: path.join(SHOTS, '1-hub-mobile.png') });
@@ -35,8 +35,8 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
   await page.waitForTimeout(600);
   check(new URL(page.url()).hash === '#wordship', `홈: 🚢 아이콘 → 워드십 카드 (${new URL(page.url()).hash})`);
 
-  // 2. 스와이프(가로 스크롤) → 두 번째 게임
-  await page.evaluate(() => document.getElementById('hub-track').scrollTo({ left: innerWidth * 2, behavior: 'instant' }));
+  // 2. 스와이프(가로 스크롤) → 두 번째 게임 (농장 · 홈 · 스도쿠 · 삼각관계)
+  await page.evaluate(() => document.getElementById('hub-track').scrollTo({ left: innerWidth * 3, behavior: 'instant' }));
   await page.waitForTimeout(300);
   check(new URL(page.url()).hash === '#trilateral', `스와이프 후 주소 #trilateral (${new URL(page.url()).hash})`);
   await page.screenshot({ path: path.join(SHOTS, '2-hub-swiped.png') });
@@ -51,7 +51,7 @@ const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
   await page.click('#btn-go-landing');
   await page.waitForURL(/\/ProjectDaily\/#trilateral$/);
   await page.waitForTimeout(200);
-  check(await page.evaluate(() => Math.round(document.getElementById('hub-track').scrollLeft / innerWidth)) === 2, '메인 화면 → 허브의 삼각관계 카드로 복귀 (홈 다음 두 번째 게임)');
+  check(await page.evaluate(() => Math.round(document.getElementById('hub-track').scrollLeft / innerWidth)) === 3, '메인 화면 → 허브의 삼각관계 카드로 복귀 (농장 · 홈 다음 두 번째 게임)');
   check(await page.locator('#trilateral .daily-card-status').first().textContent().then((t) => t === '진행 중'), '허브: 삼각관계 스탠다드 "진행 중" 반영');
   // 휴대폰 "뒤로"가 방금 나온 게임으로 되돌아가지 않아야 함
   await page.goBack().catch(() => {});

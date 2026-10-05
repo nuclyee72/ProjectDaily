@@ -1,6 +1,6 @@
 /**
  * home.js — 허브 맨 왼쪽 홈 카드 (#home).
- * 프로필(아바타 · 닉네임 · 판 수 · 연속 · 최장) + 오늘의 데일리 바로 시작 + 플레이 비율 + 최근 1주 활동을 한 카드에.
+ * 프로필(아바타 · 닉네임 · 판 수 · 연속 · 최장 · 지난 농장 시즌 도감) + 오늘의 데일리 바로 시작 + 플레이 비율 + 최근 1주 활동을 한 카드에.
  * 모든 값은 각 게임이 남긴 localStorage 기록에서 계산한다 — 홈이 새로 저장하는 건 프로필(아바타·닉네임)뿐.
  * index.html의 인라인 스크립트가 게임 목록과 공용 함수를 넘겨 DailyHome.build(ctx)로 만든다.
  */
@@ -94,7 +94,11 @@
     const nameText = el('span', 'home-name-text');
     nameBtn.append(nameText, el('span', 'home-name-edit', '✎'));
     const meta = el('p', 'home-meta');
-    profile.append(avatarBtn, nameBtn, meta);
+    // 지난 농장 시즌 도감 결과 (farm.js가 시즌이 끝날 때 남긴 기록)
+    const farmBadge = button('home-farm');
+    farmBadge.hidden = true;
+    farmBadge.addEventListener('click', () => goToSlug('farm'));
+    profile.append(avatarBtn, nameBtn, meta, farmBadge);
 
     // 아바타 고르기 — 카드 안에 뜨는 작은 판
     const picker = el('div', 'home-avatar-picker');
@@ -241,6 +245,12 @@
       last = stats;
       paintProfile();
       paintMeta(stats);
+      const lastSeason = (readJSON('daily-farm:history') || []).slice(-1)[0];
+      farmBadge.hidden = !lastSeason;
+      if (lastSeason) {
+        farmBadge.textContent = `🌾 ${Number(lastSeason.season.slice(5))}월 도감 ${lastSeason.done}/6 · ★${lastSeason.stars}`;
+        farmBadge.setAttribute('aria-label', `지난 농장 시즌 ${lastSeason.season} 도감 ${lastSeason.done}/6, 별 ${lastSeason.stars} — 농장 카드로`);
+      }
       nPlays.textContent = stats.plays;
       nStreak.textContent = `${stats.streak}일`;
       nMax.textContent = `${stats.maxStreak}일`;

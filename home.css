@@ -75,6 +75,19 @@
   user-select: text;
 }
 .home-meta { margin: 2px 0 0; font-size: 12px; font-weight: 600; color: rgba(var(--text-given-rgb), 0.5); font-variant-numeric: tabular-nums; }
+.home-farm {
+  margin-top: 4px;
+  padding: 2px 9px;
+  border: none;
+  border-radius: 999px;
+  background: var(--playing-bg);
+  color: var(--playing-text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.home-farm[hidden] { display: none; }
 
 .home-avatar-picker {
   position: absolute;
@@ -206,6 +219,7 @@
   .home-meta { font-size: 11px; }
   .home-profile { margin-bottom: 8px; }
   .home-avatar-picker { top: 70px; }
+  .home-farm { margin-top: 2px; padding: 1px 8px; font-size: 10px; }
   .home-stack { gap: 7px; }
   .home-tile { --chip: 24px; padding: 4px 5px; }
   .home-week-cell { height: 20px; font-size: 10px; }

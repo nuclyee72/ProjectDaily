@@ -534,6 +534,7 @@
     }
   </style>
   <link rel="stylesheet" href="home.css"/>
+  <link rel="stylesheet" href="farm/farm.css"/>
 </head>
 <body>
   <main id="hub-track" class="hub-track" aria-label="게임 목록"></main>
@@ -541,6 +542,10 @@
   <button id="hub-next" class="hub-arrow hub-arrow-next" type="button" aria-label="다음 게임">›</button>
   <nav id="hub-dots" class="hub-dots" aria-label="게임 선택"></nav>
 
+  <script src="farm/data.js"></script>
+  <script src="farm/engine.js"></script>
+  <script src="farm/sprites.js"></script>
+  <script src="farm/farm.js"></script>
   <script src="home.js"></script>
   <script>
     // ── 게임 목록 ──
@@ -979,9 +984,9 @@
     const dotsEl = document.getElementById('hub-dots');
     const prevBtn = document.getElementById('hub-prev');
     const nextBtn = document.getElementById('hub-next');
-    const cardViews = []; // 슬라이드마다 { show(name), current() } — 0번은 홈
-    // 슬라이드 순서 = 주소 #: 홈 · 게임 넷
-    const SLIDES = ['home', ...GAMES.map((g) => g.slug)];
+    const cardViews = []; // 슬라이드마다 { show(name), current() } — SLIDES와 같은 순서
+    // 슬라이드 순서 = 주소 #: 농장 · 홈 · 게임 넷 (주소에 #이 없으면 홈부터)
+    const SLIDES = ['farm', 'home', ...GAMES.map((g) => g.slug)];
 
     function makeFooter() {
       const footer = el('p', 'landing-footer');
@@ -992,7 +997,18 @@
       return footer;
     }
 
-    // ── 홈 (home.js) — 맨 왼쪽 ──
+    // ── 농장 (farm/) — 맨 왼쪽 ──
+    const farm = DailyFarm.build({ GAMES, todayStr, untilNextReset, readJSON, el, button });
+    track.append(farm.slide);
+    cardViews.push({ show: farm.show, current: farm.current, render: () => {} });
+    {
+      const dot = button('hub-dot hub-dot-farm');
+      dot.setAttribute('aria-label', '데일리 농장');
+      dot.addEventListener('click', () => goTo(SLIDES.indexOf('farm')));
+      dotsEl.append(dot);
+    }
+
+    // ── 홈 (home.js) — 농장 오른쪽 ──
     const home = DailyHome.build({
       GAMES, todayStr, shiftDate, untilNextReset, readJSON, openUrl, el, link, button, toggleDark,
       goToSlug: (slug) => goTo(SLIDES.indexOf(slug)),
@@ -1003,7 +1019,7 @@
     {
       const dot = button('hub-dot hub-dot-home');
       dot.setAttribute('aria-label', '홈');
-      dot.addEventListener('click', () => goTo(0));
+      dot.addEventListener('click', () => goTo(SLIDES.indexOf('home')));
       dotsEl.append(dot);
     }
 
@@ -1071,7 +1087,7 @@
 
       const dot = button('hub-dot');
       dot.setAttribute('aria-label', game.title);
-      dot.addEventListener('click', () => goTo(i + 1));
+      dot.addEventListener('click', () => goTo(SLIDES.indexOf(game.slug)));
       dotsEl.append(dot);
     });
 
@@ -1085,6 +1101,7 @@
         badge.dataset.status = status;
       });
       cardViews.forEach((v) => v.render()); // 열려 있는 하위 화면(달력·통계)도 다시
+      farm.refresh(); // 출석 · 시즌 넘김 · NP 다시 계산 (홈이 보는 지난 시즌 기록도 여기서 남는다)
       home.refresh();
     }
 
@@ -1129,9 +1146,9 @@
 
     // ── 시작 ──
     refreshStatus();
-    // 주소에 #이 없으면 홈부터
+    // 주소에 #이 없으면 홈부터 (농장은 홈 왼쪽)
     const start = SLIDES.indexOf(location.hash.slice(1));
-    goTo(start < 0 ? 0 : start, false);
+    goTo(start < 0 ? SLIDES.indexOf('home') : start, false);
     // 데일리 리셋(아침 6시) 순간에도 — 허브를 켜 둔 채 넘어가면 날짜·상태가 전날로 남지 않게
     (function scheduleResetRefresh() {
       const ms = 86400000 - ((Date.now() + DAY_OFFSET_MS) % 86400000);
