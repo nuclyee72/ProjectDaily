@@ -1,5 +1,5 @@
 // 허브 카드의 메인·모든 하위 화면이 여러 화면 크기에서 카드 폭 그대로 · 스크롤 없이 들어가는지 (6줄 달 기준)
-// 농장 카드: 탭 6개 + 판(가방 4칸 · NP · 심기 · 요리)이 본문 · 판 안에 넘치지 않는지 (물건이 많은 시즌 중반 기준)
+// 농장 카드: 탭 6개 + 판(가방 5칸 · 장신구 칸 고르기 · NP · 심기 · 요리 · 도움말 8쪽 · 넘친 가방)이 본문 · 판 안에 넘치지 않는지 (물건이 많은 시즌 중반 기준)
 const path = require('path');
 const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
 const SIZES = [[320, 480], [375, 548], [360, 640], [390, 664], [393, 700], [412, 780], [390, 844], [1280, 720], [1280, 600]];
@@ -32,7 +32,7 @@ const VIEWS = [['메인', null], ['지난 퍼즐', null], ['자유 연습', null
       s.plots = Array.from({ length: 8 }, (_, i) => (i % 3 ? { seed: 2, crop: 'goldapple', plantedAt: Date.now() - 9 * 3600000, readyAt: Date.now() - (i % 2) * 7200000 + 3600000 } : null));
       Object.assign(s.inv, { seed: [12345, 4567, 890, 12], mat: 2345, mat2: 456, ticket: 23, box: 12, relic: 3 });
       Object.assign(s, { money: 1234567, sp: 23456, ap: 1234, bonus: 900 });
-      for (const c of window.DailyFarm.data.CROPS) s.inv.crop[c.id] = Array.from({ length: 30 }, (_, k) => ((k * 37) % 100) + 1);
+      for (const c of window.DailyFarm.data.CROPS) s.inv.crop[c.id] = Array.from({ length: 18 }, (_, k) => ((k * 37) % 100) + 1); // 990개 (한도 1,000 아래)
       for (const d of window.DailyFarm.data.DISHES.slice(0, 40)) s.inv.food[d.id] = [0, 1, 2, 3];
       for (let i = 0; i < 100; i++) E.rollGear(s, () => ((i * 7919) % 1000) / 1000);
       s.explore.boosts = [[Date.now() - 3600000, Date.now() + 5 * 3600000]];
@@ -45,10 +45,18 @@ const VIEWS = [['메인', null], ['지난 퍼즐', null], ['자유 연습', null
       const w0 = await p.locator('#sudoku .landing-card').evaluate((e) => e.getBoundingClientRect().width);
       const views = [];
       for (const t of ['farm', 'explore', 'craft', 'cook', 'codex', 'shop']) views.push([t, () => p.click(`#farm .farm-tab[data-tab="${t}"]`)]);
-      for (const sg of ['crop', 'item', 'food', 'gear']) views.push(['가방/' + sg, async () => { await p.click('#farm .farm-bag'); await p.click(`#farm .farm-panel .farm-seg button[data-seg="${sg}"]`); }]);
+      for (const sg of ['crop', 'item', 'food', 'gear', 'misc']) views.push(['가방/' + sg, async () => { await p.click('#farm .farm-bag'); await p.click(`#farm .farm-panel .farm-seg button[data-seg="${sg}"]`); }]);
+      views.push(['가방/장신구 칸', async () => { await p.click('#farm .farm-bag'); await p.click('#farm .farm-panel .farm-seg button[data-seg="gear"]'); await p.click('#farm .farm-equip-slot[data-slot="0"]'); }]);
+      views.push(['가방/완료권', async () => { await p.click('#farm .farm-bag'); await p.click('#farm .farm-panel .farm-seg button[data-seg="misc"]'); await p.click('#farm .farm-item[data-misc="ticket"] .farm-btn'); }]);
       views.push(['NP', () => p.click('#farm .farm-coin[data-cur="np"]')]);
       views.push(['심기', async () => { await p.click('#farm .farm-tab[data-tab="farm"]'); await p.click('#farm .farm-plot.is-empty'); }]);
-      views.push(['요리', async () => { await p.click('#farm .farm-tab[data-tab="cook"]'); await p.click('#farm .farm-dish'); }]);
+      // 요리: 재료 칸이 가장 많은 배추김치 (7칸)
+      views.push(['요리', async () => {
+        await p.click('#farm .farm-tab[data-tab="cook"]');
+        while (!(await p.locator('#farm .farm-dish[data-dish="12"]').count())) await p.locator('#farm .farm-body .farm-page-btn').last().click();
+        await p.click('#farm .farm-dish[data-dish="12"]');
+      }]);
+      for (let k = 0; k < 8; k++) views.push(['도움말' + k, async () => { await p.click('#farm .farm-help-btn'); await p.locator('#farm .farm-help-nav button').nth(k).click(); }]);
       for (const [key, go] of views) {
         await go();
         await p.waitForTimeout(80);
@@ -65,6 +73,25 @@ const VIEWS = [['메인', null], ['지난 퍼즐', null], ['자유 연습', null
         worst['농장/' + key] = Math.max(worst['농장/' + key] ?? 0, r.h);
         if ((w === 390 && h === 844) || (w === 320 && h === 480)) await p.screenshot({ path: path.join(SHOTS, `view-farm-${key.replace('/', '-')}-${w}x${h}.png`) });
         await p.keyboard.press('Escape');
+      }
+      // 넘친 가방 (닫을 수 없음, 알림 줄이 한 줄 더): 작물 1,010개 · 장신구 103개
+      for (const kind of ['crop', 'gear']) {
+        await p.evaluate((k) => {
+          const s = JSON.parse(localStorage.getItem('daily-farm:state'));
+          if (k === 'crop') s.inv.crop.potato.push(...Array(20).fill(50));
+          else for (let i = 0; i < 3; i++) window.DailyFarm.engine.rollGear(s, Math.random);
+          localStorage.setItem('daily-farm:state', JSON.stringify(s));
+        }, kind);
+        await p.reload();
+        await p.evaluate(() => document.getElementById('farm').scrollIntoView({ behavior: 'instant', inline: 'start' }));
+        await p.waitForTimeout(80);
+        const r = await card.evaluate((c) => {
+          const panel = c.querySelector('.farm-panel');
+          return { title: c.querySelector('.farm-panel-title')?.textContent, scroll: c.scrollHeight - c.clientHeight, panel: panel.hidden ? -1 : panel.scrollHeight - panel.clientHeight };
+        });
+        const ok = r.title === '가방이 넘쳤어요' && r.scroll <= 0 && r.panel >= 0 && r.panel <= 1;
+        if (!ok) { bad++; console.log(`FAIL ${w}x${h} farm 넘침/${kind}: ${JSON.stringify(r)}`); }
+        if ((w === 390 && h === 844) || (w === 320 && h === 480)) await p.screenshot({ path: path.join(SHOTS, `view-farm-overflow-${kind}-${w}x${h}.png`) });
       }
     }
     {

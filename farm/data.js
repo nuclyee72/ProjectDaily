@@ -72,7 +72,8 @@
   ].flatMap((list, tier) => list.map(([id, name]) => ({ id, name, tier })));
 
   // §6 품질 1~100: 평평한 끝까지 같은 확률, 그 위로 정규분포 꼬리. σ는 p(100)이 목표가 되게 engine이 맞춘다
-  const QUALITY = { flatEnd: 30, p100: 0.001, max: 100 };
+  // colors = 화면 칸 바탕색 단계: 이 값 이상이면 빨강 · 주황 · 파랑 · 초록 (그 아래는 색 없음)
+  const QUALITY = { flatEnd: 30, p100: 0.001, max: 100, colors: [95, 80, 60, 40] };
 
   // §7 · §8 제작 (강화 39단계). 단계마다 [자재, 고급 자재, 목표일, 설명]. 돈은 아래 CRAFT_MONEY로 계산
   const CRAFT = [
@@ -138,6 +139,7 @@
     tiers: [0.6, 0.3, 0.09, 0.01],
     bag: 100, // 착용 중 포함
     equipBase: 1, // + 장신구 착용 단계
+    looks: ['반지', '목걸이', '귀걸이', '팔찌', '별 브로치', '왕관', '부적', '리본', '메달', '하트'], // 모습: 얻을 때 무작위 (효과와 상관없음)
     opts: [
       { id: 'seedBag', name: '씨앗 주머니', desc: '탐험 씨앗 개수 +{v}%', step: 1, range: [[1, 10], [11, 20], [21, 25], [30, 30]] },
       { id: 'matBag', name: '자재 주머니', desc: '탐험 자재 개수 +{v}%', step: 1, range: [[1, 10], [11, 20], [21, 25], [30, 30]] },
@@ -153,6 +155,8 @@
 
   // §12 분해
   const DISMANTLE = { seedSp: [1, 3, 15, 100], gearApBase: 1, gearApLine: [2, 5, 20, 50] };
+  // 작물 가방: 하나씩 한 칸, 최대 size개. 넘치면 팔아서 줄인다 (작물 1개 값 = 등급별 돈, 임시로 씨앗 분해 SP와 같은 비율)
+  const CROP_BAG = { size: 1000, price: [1, 3, 15, 100] };
 
   // §14 요리 · 별 · 판매 · 도감
   const COOK = {
@@ -164,7 +168,7 @@
     min: 5,
     max: 95,
     maxStars: 3,
-    codex: [1, 2, 2, 1], // 시즌 도감 6개: 등급별 개수
+    codex: [2, 4, 4, 2], // 시즌 도감 12개: 등급별 개수
   };
 
   // §15 상점. NP 상점 + AP · SP 상점(같은 리스트, SP = AP × spRatio, 매일 offers개씩)
@@ -300,7 +304,7 @@
 
   F.data = {
     TIERS, NP, EXPLORE, BOX, FIELD, SEED_TO_CROP, HARVEST, CROPS, CROP_BY_ID, QUALITY,
-    CRAFT, CRAFT_MONEY, CARE, REUSE, BOUNTY, SYNTH, GEAR, DISMANTLE, COOK, SHOP,
+    CRAFT, CRAFT_MONEY, CARE, REUSE, BOUNTY, SYNTH, GEAR, DISMANTLE, CROP_BAG, COOK, SHOP,
     DISHES: DISH_LIST, DISH_BY_ID: Object.fromEntries(DISH_LIST.map((d) => [d.id, d])),
   };
 })();

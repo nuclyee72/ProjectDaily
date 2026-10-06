@@ -33,8 +33,9 @@ ProjectDaily/                  ← 이 레포 (허브)
 - 숫자는 `farm/data.js` 한곳에 모여 있다 (`docs/farm-GDD.xlsx`와 같은 값). 규칙은 `engine.js`(DOM 없음, 난수 · 시각을 인자로), 도트는 `sprites.js`(16×16 픽셀맵에 음영을 계산해 그림)
 - 저장: `daily-farm:state`(이번 시즌, 달이 바뀌면 초기화) · `daily-farm:history`(지난 시즌 도감 기록, 홈 프로필 배지)
 - NP는 저장하지 않고 각 게임 통계(`statsKey`)의 이번 달 기록에서 매번 계산한다
-- 카드 안은 스크롤하지 않는다: 긴 목록은 쪽(‹ ›), 가방 · 결과 · 고르기는 카드를 덮는 판
-- 테스트: `tests/farm-engine.test.cjs`(규칙 · 도트, Node) · `tests/farm.test.cjs`(화면, 브라우저) · `layout.test.cjs`(농장 화면 13개 크기 검사)
+- 카드 안은 스크롤하지 않는다: 긴 목록은 쪽(‹ ›), 가방 · 결과 · 고르기 · 도움말(?)은 카드를 덮는 판. 설명 글은 ? 하나에 모은다
+- 다크 모드는 허브 설정(`data-theme`)을 따르고, 색은 `farm.css`의 `--farm-*` 토큰을 다크에서 바꿔 쓴다
+- 테스트: `tests/farm-engine.test.cjs`(규칙 · 도트, Node) · `tests/farm.test.cjs`(화면, 브라우저) · `layout.test.cjs`(농장 화면 26개 크기 검사)
 
 ## 허브 ↔ 게임 연결
 

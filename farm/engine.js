@@ -133,7 +133,8 @@
   function rollSeason(state, today, now) {
     const season = seasonOf(today);
     if (state && state.season === season) return { state, ended: null };
-    return { state: newState(season, now), ended: state ? { season: state.season, ...codexSummary(state) } : null };
+    const ended = state ? { season: state.season, ...codexSummary(state), total: codexDishes(state.season).length } : null;
+    return { state: newState(season, now), ended };
   }
   /** 그 달 마지막 날까지 남은 날 (0 = D-DAY) */
   function daysLeft(today) {
@@ -182,34 +183,47 @@
     const v = Math.round((lo + randInt(rng, 0, Math.round((hi - lo) / opt.step)) * opt.step) * 10) / 10;
     return { opt: opt.id, tier: t, v };
   }
-  function addGear(state, lines) {
-    const g = { id: state.nextGear++, lines, lock: false };
+  /** 모습(GEAR.looks 번호)은 효과와 따로 무작위 */
+  function addGear(state, lines, rng) {
+    const g = { id: state.nextGear++, lines, lock: false, look: Math.floor(rng() * D.GEAR.looks.length) };
     state.inv.gear.push(g);
     return g;
   }
+  /** 모습이 없는 예전 장신구는 id로 정한다 */
+  const gearLook = (g) => (Number.isInteger(g.look) && g.look >= 0 && g.look < D.GEAR.looks.length ? g.look : g.id % D.GEAR.looks.length);
   /** 줄 수를 굴려(또는 lineProbs대로) 장신구 하나를 가방에 넣는다. 한 장신구 안에서 옵션은 서로 다름 */
   function rollGear(state, rng, lineProbs = D.GEAR.lines) {
     const n = pickIndex(rng, lineProbs);
     const lines = [];
     for (let i = 0; i < n; i++) lines.push(rollLine(rng, lines.map((l) => l.opt)));
-    return addGear(state, lines);
+    return addGear(state, lines, rng);
   }
   /** 고대 유물: 2줄, 1줄째는 전설 고정 */
   function openRelic(state, rng) {
     if (state.inv.relic < 1) return null;
     state.inv.relic--;
     const first = rollLine(rng, [], 3);
-    return addGear(state, [first, rollLine(rng, [first.opt])]);
+    return addGear(state, [first, rollLine(rng, [first.opt])], rng);
   }
-  function equipGear(state, id) {
-    if (!findGear(state, id) || state.equip.includes(id) || state.equip.length >= equipSlots(state)) return false;
-    state.equip.push(id);
+  /** equip은 칸 번호대로 (빈 칸은 null) — 하나를 빼도 다른 칸이 당겨지지 않는다 */
+  const equipCount = (state) => state.equip.filter((id) => id != null).length;
+  /** slot = 착용 칸 번호 (없으면 앞쪽 빈 칸). 장신구가 있는 칸이면 바꿔 끼운다 (교체) */
+  function equipGear(state, id, slot) {
+    if (!findGear(state, id) || state.equip.includes(id)) return false;
+    if (slot == null) {
+      slot = state.equip.findIndex((x) => x == null);
+      if (slot < 0) slot = state.equip.length;
+    }
+    if (!Number.isInteger(slot) || slot < 0 || slot >= equipSlots(state)) return false;
+    while (state.equip.length < slot) state.equip.push(null);
+    state.equip[slot] = id;
     return true;
   }
   function unequipGear(state, id) {
     const i = state.equip.indexOf(id);
     if (i < 0) return false;
-    state.equip.splice(i, 1);
+    state.equip[i] = null;
+    while (state.equip.length && state.equip[state.equip.length - 1] == null) state.equip.pop();
     return true;
   }
   function toggleLock(state, id) {
@@ -241,6 +255,30 @@
     state.inv.seed[tier] -= k;
     state.sp += k * D.DISMANTLE.seedSp[tier];
     return k * D.DISMANTLE.seedSp[tier];
+  }
+
+  // ── 작물 가방 ──
+  const cropCount = (state) => Object.values(state.inv.crop).reduce((n, qs) => n + qs.length, 0);
+  /** 가방 한도를 넘은 개수 (0이 아니면 화면이 가방을 띄워 팔게 한다) */
+  const cropOverflow = (state) => Math.max(0, cropCount(state) - D.CROP_BAG.size);
+  const cropPrice = (cropId) => D.CROP_BAG.price[D.CROP_BY_ID[cropId].tier];
+  /** picks = { 작물 id: [가방 안 인덱스, ...] } → 판 돈. 잘못된 고르기가 하나라도 있으면 아무것도 안 판다 */
+  function sellCrops(state, picks) {
+    const entries = Object.entries(picks || {});
+    for (const [id, idx] of entries) {
+      const have = state.inv.crop[id];
+      if (!have || !Array.isArray(idx) || new Set(idx).size !== idx.length) return 0;
+      if (idx.some((i) => !Number.isInteger(i) || i < 0 || i >= have.length)) return 0;
+    }
+    let money = 0;
+    for (const [id, idx] of entries) {
+      const have = state.inv.crop[id];
+      for (const i of [...idx].sort((a, b) => b - a)) have.splice(i, 1);
+      money += idx.length * cropPrice(id);
+      if (!have.length) delete state.inv.crop[id];
+    }
+    state.money += money;
+    return money;
   }
 
   // ── 탐험 (§4) ──
@@ -575,8 +613,8 @@
     H, VERSION, rngFromSeed, hashString, mulberry32, quality: QT, rollQuality,
     seasonOf, newState, isValidState, rollSeason, daysLeft, codexSummary,
     markAttendance, npEarned, npBalance,
-    equipSlots, gearMods, rollGear, openRelic, equipGear, unequipGear, toggleLock, gearAp, canDismantle, dismantleGear, gearOverflow,
-    dismantleSeeds, OPT_BY_ID,
+    equipSlots, equipCount, gearMods, rollGear, openRelic, gearLook, equipGear, unequipGear, toggleLock, gearAp, canDismantle, dismantleGear, gearOverflow,
+    dismantleSeeds, OPT_BY_ID, cropCount, cropOverflow, cropPrice, sellCrops,
     rollsPerHour, explorePending, claimExplore, openBox, exploreRoll, emptyGot,
     plotCount, canPlantTier, rollCrop, plant, growthStage, useTicket, harvestCount, harvest,
     nextStep, canCraft, craft, synthRatio, synthesize,

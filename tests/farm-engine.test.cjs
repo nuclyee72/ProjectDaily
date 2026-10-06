@@ -58,13 +58,13 @@ function dist(counts, expect, total, tol = 0.005) {
   check(E.isValidState(s) && !E.isValidState(null) && !E.isValidState({}) && !E.isValidState({ ...s, inv: null }) && !E.isValidState({ ...s, v: 99 }), '깨진 state는 쓸 수 없음으로 판정');
   const old = { ...E.newState('2026-09', T0), codex: { 1: 2, 45: 3 } };
   const r = E.rollSeason(old, '2026-10-01', T0);
-  check(r.state.season === '2026-10' && same(r.ended, { season: '2026-09', done: 2, stars: 5 }) && r.state.inv.mat === 0, '시즌이 바뀌면 history 요약(등록 2 · 별 5) + 새 state');
+  check(r.state.season === '2026-10' && same(r.ended, { season: '2026-09', done: 2, stars: 5, total: 12 }) && r.state.inv.mat === 0, '시즌이 바뀌면 history 요약(등록 2 · 별 5 · 도감 12개) + 새 state');
   const same1 = E.rollSeason(s, TODAY, T0);
   check(same1.state === s && same1.ended === null, '같은 시즌이면 그대로');
   check(E.daysLeft('2026-10-05') === 26 && E.daysLeft('2026-10-31') === 0 && E.daysLeft('2026-02-28') === 0, '남은 날: 10/5 = D-26, 마지막 날 = D-DAY');
   const cdx = E.codexDishes('2026-10');
-  check(same(cdx, E2.codexDishes('2026-10')) && !same(cdx, E.codexDishes('2026-11')), '도감 6개: 같은 시즌은 늘 같고 다른 시즌은 다름');
-  check(same(cdx.map((id) => D.DISH_BY_ID[id].tier), [0, 1, 1, 2, 2, 3]) && new Set(cdx).size === 6, `도감 등급별 1 · 2 · 2 · 1개 (${cdx.join(',')})`);
+  check(same(cdx, E2.codexDishes('2026-10')) && !same(cdx, E.codexDishes('2026-11')), '도감 12개: 같은 시즌은 늘 같고 다른 시즌은 다름');
+  check(same(cdx.map((id) => D.DISH_BY_ID[id].tier), [0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3]) && new Set(cdx).size === 12, `도감 등급별 2 · 4 · 4 · 2개 (${cdx.join(',')})`);
 }
 
 // ── NP ──
@@ -256,6 +256,13 @@ function dist(counts, expect, total, tol = 0.005) {
     if (g.lines.length !== 2 || g.lines[0].tier !== 3 || g.lines[0].v !== legend || g.lines[0].opt === g.lines[1].opt) relicOk = false;
   }
   check(relicOk && E.openRelic(s, rng) === null, '고대 유물: 늘 2줄, 1줄은 전설 고정값, 두 줄 옵션이 다름');
+  // 모습 10가지: 얻을 때 무작위, 예전 장신구(모습 없음)는 id로
+  const looks = Array(D.GEAR.looks.length).fill(0);
+  const lk = fresh();
+  for (let i = 0; i < N; i++) { looks[E.rollGear(lk, rng).look]++; if (lk.inv.gear.length > 500) lk.inv.gear.length = 0; }
+  check(D.GEAR.looks.length === 10 && dist(looks, looks.map(() => 0.1), N), `장신구 모습 10가지 1/10씩 (${looks.map((x) => pct(x / N)).join(' · ')})`);
+  check(Number.isInteger(E.openRelic({ ...lk, inv: { ...lk.inv, relic: 1 } }, rng).look) && E.gearLook({ id: 23, lines: [] }) === 3 && E.gearLook({ id: 23, look: 7, lines: [] }) === 7,
+    '고대 유물 장신구도 모습이 있음 · 모습 없는 예전 장신구는 id로 (23 → 3)');
 
   // 분해 · 착용 · 잠금 · 가방
   const t = fresh();
@@ -267,6 +274,16 @@ function dist(counts, expect, total, tol = 0.005) {
   const ap = E.dismantleGear(t, [zero.id, lr.id, locked.id, worn.id]);
   check(ap === 72 && t.ap === 72 && t.inv.gear.length === 2, '분해 → AP, 잠금 · 착용 중은 분해 안 됨');
   check(!E.equipGear(t, locked.id) && E.unequipGear(t, worn.id) && E.equipGear(t, locked.id), '착용 칸보다 많이 못 낌, 빼면 낄 수 있음');
+  check(E.equipGear(t, worn.id, 0) && same(t.equip, [worn.id]) && !E.equipGear(t, worn.id, 0) && !E.equipGear(t, worn.id, 1),
+    '칸 번호로 끼우면 그 칸을 바꿔 끼움 (교체), 이미 낀 장신구 · 빈 칸이 없으면 안 됨');
+  const pos = fresh(); pos.built.equip = 2;
+  const [p1, p2, p3] = [0, 1, 2].map(() => E.rollGear(pos, seq(0.1)).id);
+  E.equipGear(pos, p1); E.equipGear(pos, p2);
+  E.unequipGear(pos, p1);
+  check(same(pos.equip, [null, p2]) && E.equipCount(pos) === 1, '1번 칸을 빼도 2번 칸은 그대로 (빈 칸은 null)');
+  E.equipGear(pos, p3);
+  check(same(pos.equip, [p3, p2]) && E.equipGear(pos, p1, 2) && same(pos.equip, [p3, p2, p1]) && E.unequipGear(pos, p1) && same(pos.equip, [p3, p2]),
+    '칸 번호 없이 끼우면 앞쪽 빈 칸부터 · 뒤쪽 빈 칸은 줄임');
   const m = fresh();
   for (let i = 0; i < 98; i++) E.rollGear(m, seq(0.1));
   for (let i = 0; i < 5; i++) E.rollGear(m, seq(0.1));
@@ -284,6 +301,20 @@ function dist(counts, expect, total, tol = 0.005) {
   const sd = fresh(); sd.inv.seed = [10, 10, 10, 10];
   const sp = [0, 1, 2, 3].map((tier) => E.dismantleSeeds(sd, tier, 1));
   check(same(sp, [1, 3, 15, 100]) && sd.sp === 119 && E.dismantleSeeds(sd, 0, 99) === 9 && sd.inv.seed[0] === 0, '씨앗 분해 1 · 3 · 15 · 100 SP, 가진 만큼만');
+}
+
+// ── 작물 가방 · 판매 ──
+{
+  const s = fresh();
+  s.inv.crop = { potato: [10, 20, 30], ginseng: [50], goldapple: [99] };
+  check(E.cropCount(s) === 5 && E.cropOverflow(s) === 0 && same([0, 1, 2, 3].map((t) => D.CROP_BAG.price[t]), [1, 3, 15, 100]), '작물 개수 · 1개 값 1 · 3 · 15 · 100돈');
+  check(E.sellCrops(s, { potato: [0, 0] }) === 0 && E.sellCrops(s, { potato: [3] }) === 0 && E.sellCrops(s, { carrot: [0] }) === 0 && E.cropCount(s) === 5 && s.money === 0,
+    '잘못 고르면 (같은 칸 두 번 · 없는 칸 · 없는 작물) 아무것도 안 팜');
+  const m = E.sellCrops(s, { potato: [2, 0], ginseng: [0], goldapple: [0] });
+  check(m === 1 + 1 + 15 + 100 && s.money === m && same(s.inv.crop, { potato: [20] }), '판매 → 돈, 고른 것만 빠지고 다 판 작물은 가방에서 없어짐');
+  const big = fresh();
+  big.inv.crop = { potato: Array(D.CROP_BAG.size - 3).fill(5), corn: Array(10).fill(50) };
+  check(D.CROP_BAG.size === 1000 && E.cropOverflow(big) === 7, '작물 가방 1,000개 · 넘친 개수');
 }
 
 // ── 요리 · 판매 ──
@@ -321,12 +352,12 @@ function dist(counts, expect, total, tol = 0.005) {
   const cdx = E.codexDishes(s.season);
   const notCodex = D.DISHES.find((d) => !cdx.includes(d.id)).id;
   s.inv.food[notCodex] = [3];
-  check(!E.submitCodex(s, notCodex, 3), '도감 6개가 아닌 요리는 제출 안 됨');
+  check(!E.submitCodex(s, notCodex, 3), '도감 12개가 아닌 요리는 제출 안 됨');
   const id = cdx[0];
   s.inv.food[id] = [1, 2, 1];
   check(E.submitCodex(s, id, 1) && s.codex[id] === 1 && same(s.inv.food[id], [2, 1]), '제출하면 등록 + 가방에서 빠짐');
   check(!E.canSubmit(s, id, 1) && E.submitCodex(s, id, 2) && s.codex[id] === 2 && !E.canSubmit(s, id, 1), '1성 등록 뒤 2성 → 갱신, 같거나 낮은 별은 안 됨');
-  check(same(E.rollSeason(s, '2026-11-01', T0).ended, { season: '2026-10', done: 1, stars: 2 }), '시즌이 바뀌면 history에 등록 수 · 별 합');
+  check(same(E.rollSeason(s, '2026-11-01', T0).ended, { season: '2026-10', done: 1, stars: 2, total: 12 }), '시즌이 바뀌면 history에 등록 수 · 별 합 · 도감 개수');
 }
 
 // ── NP 상점 ──
@@ -374,7 +405,8 @@ function dist(counts, expect, total, tol = 0.005) {
 // ── 도트 (음영 계산까지. 캔버스로 그리는 건 화면 테스트에서) ──
 {
   const names = S.names();
-  check(names.length === 242 && new Set(names).size === 242, `도트 242장 (기타 32 · 작물 55 · 다 큰 작물 55 · 요리 100) (${names.length})`);
+  check(names.length === 251 && new Set(names).size === 251, `도트 251장 (기타 41 · 작물 55 · 다 큰 작물 55 · 요리 100) (${names.length})`);
+  check(D.GEAR.looks.every((_, i) => !i || names.includes('gear:' + i)), '장신구 모습마다 그림 (0은 item:gear)');
   const bad = [];
   for (const n of names) {
     const d = S.def(n);

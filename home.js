@@ -248,8 +248,9 @@
       const lastSeason = (readJSON('daily-farm:history') || []).slice(-1)[0];
       farmBadge.hidden = !lastSeason;
       if (lastSeason) {
-        farmBadge.textContent = `🌾 ${Number(lastSeason.season.slice(5))}월 도감 ${lastSeason.done}/6 · ★${lastSeason.stars}`;
-        farmBadge.setAttribute('aria-label', `지난 농장 시즌 ${lastSeason.season} 도감 ${lastSeason.done}/6, 별 ${lastSeason.stars} — 농장 카드로`);
+        const total = lastSeason.total || 6; // 도감 개수 (예전 기록엔 없음 — 그땐 6개)
+        farmBadge.textContent = `🌾 ${Number(lastSeason.season.slice(5))}월 도감 ${lastSeason.done}/${total} · ★${lastSeason.stars}`;
+        farmBadge.setAttribute('aria-label', `지난 농장 시즌 ${lastSeason.season} 도감 ${lastSeason.done}/${total}, 별 ${lastSeason.stars} — 농장 카드로`);
       }
       nPlays.textContent = stats.plays;
       nStreak.textContent = `${stats.streak}일`;
