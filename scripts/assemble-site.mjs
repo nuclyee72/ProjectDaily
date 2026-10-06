@@ -13,13 +13,14 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.resolve(process.argv[2] ?? '_site');
 
-const HUB_FILES = ['index.html', 'home.js', 'home.css', 'farm', 'about.html', 'privacy.html', 'page.css', '.nojekyll', 'icon.svg', 'manifest.webmanifest'];
+const HUB_FILES = ['index.html', 'home.js', 'home.css', 'about.html', 'privacy.html', 'page.css', '.nojekyll', 'icon.svg', 'manifest.webmanifest'];
 // 게임마다 사이트에 필요한 것만 (scripts · docs · node_modules 등은 제외)
 const GAME_FILES = {
   DailySudoku:     ['index.html', 'style.css', 'icon.svg', 'manifest.webmanifest', 'src', 'daily'],
   DailyTrilateral: ['index.html', 'style.css', 'icon.svg', 'manifest.webmanifest', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'src', 'daily'],
   DailyWordship:   ['index.html', 'style.css', 'icon.svg', 'manifest.webmanifest', 'src', 'daily'],
   DailyBWSweeper:  ['index.html', 'style.css', 'icon.svg', 'manifest.webmanifest', 'src'], // 데일리 판은 날짜 시드로 브라우저에서 만든다 (daily 폴더 없음)
+  DailyFarmingGame: ['farm.css', 'src'], // 혼자 도는 페이지 없음 — 허브 index.html이 불러 농장 카드로 만든다
 };
 
 rmSync(OUT, { recursive: true, force: true });

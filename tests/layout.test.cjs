@@ -28,6 +28,7 @@ const VIEWS = [['메인', null], ['지난 퍼즐', null], ['자유 연습', null
     await p.evaluate(() => {
       const E = window.DailyFarm.engine;
       const s = E.newState('2027-01', Date.now() - 30 * 3600000);
+      s.gift = true;
       Object.assign(s.built, { field: 6, synth: 1, eff: 3, care: 2, facility: 3, reuse: 4, bounty: 16, explore: 2, equip: 2 });
       s.plots = Array.from({ length: 8 }, (_, i) => (i % 3 ? { seed: 2, crop: 'goldapple', plantedAt: Date.now() - 9 * 3600000, readyAt: Date.now() - (i % 2) * 7200000 + 3600000 } : null));
       Object.assign(s.inv, { seed: [12345, 4567, 890, 12], mat: 2345, mat2: 456, ticket: 23, box: 12, relic: 3 });

@@ -14,3 +14,7 @@
 	path = DailyBWSweeper
 	url = https://github.com/nuclyee72/DailyBWSweeper.git
 	branch = main
+[submodule "DailyFarmingGame"]
+	path = DailyFarmingGame
+	url = https://github.com/nuclyee72/DailyFarmingGame.git
+	branch = main

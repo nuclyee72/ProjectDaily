@@ -2,7 +2,8 @@
 const { spawnSync } = require('child_process');
 const path = require('path');
 
-const TESTS = ['farm-engine.test.cjs', 'farm.test.cjs', 'hub.test.cjs', 'stats.test.cjs', 'layout.test.cjs'];
+// 농장 규칙 테스트는 서브모듈(DailyFarmingGame)에 있다
+const TESTS = ['../DailyFarmingGame/tests/engine.test.cjs', 'farm.test.cjs', 'hub.test.cjs', 'stats.test.cjs', 'layout.test.cjs'];
 let failed = 0;
 for (const t of TESTS) {
   console.log(`\n━━━ ${t} ━━━`);

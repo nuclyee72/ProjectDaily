@@ -534,7 +534,7 @@
     }
   </style>
   <link rel="stylesheet" href="home.css"/>
-  <link rel="stylesheet" href="farm/farm.css"/>
+  <link rel="stylesheet" href="DailyFarmingGame/farm.css"/>
 </head>
 <body>
   <main id="hub-track" class="hub-track" aria-label="게임 목록"></main>
@@ -542,10 +542,11 @@
   <button id="hub-next" class="hub-arrow hub-arrow-next" type="button" aria-label="다음 게임">›</button>
   <nav id="hub-dots" class="hub-dots" aria-label="게임 선택"></nav>
 
-  <script src="farm/data.js"></script>
-  <script src="farm/engine.js"></script>
-  <script src="farm/sprites.js"></script>
-  <script src="farm/farm.js"></script>
+  <!-- 데일리 농장 (서브모듈 DailyFarmingGame) -->
+  <script src="DailyFarmingGame/src/data.js"></script>
+  <script src="DailyFarmingGame/src/engine.js"></script>
+  <script src="DailyFarmingGame/src/sprites.js"></script>
+  <script src="DailyFarmingGame/src/farm.js"></script>
   <script src="home.js"></script>
   <script>
     // ── 게임 목록 ──
@@ -997,7 +998,7 @@
       return footer;
     }
 
-    // ── 농장 (farm/) — 맨 왼쪽 ──
+    // ── 농장 (서브모듈 DailyFarmingGame) — 맨 왼쪽 ──
     const farm = DailyFarm.build({ GAMES, todayStr, untilNextReset, readJSON, el, button });
     track.append(farm.slide);
     cardViews.push({ show: farm.show, current: farm.current, render: () => {} });

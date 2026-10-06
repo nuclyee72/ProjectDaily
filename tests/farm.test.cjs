@@ -1,5 +1,5 @@
 // 데일리 농장 카드 (#farm) — 허브 위치 · NP · 탐험 · 심기/수확 · 제작 · 요리(재료 칸)/판매 · 도감 12칸 · 상점 · 가방(작물 하나씩 · 기타 · 장신구 칸) · 가방 넘침 · 도움말 · 시즌 넘김.
-// 규칙 계산은 farm-engine.test.cjs가 보고, 여기선 화면에서 눌러서 그대로 되는지 본다. 시각은 page.clock, 난수는 고정.
+// 규칙 계산은 서브모듈 DailyFarmingGame/tests/engine.test.cjs가 보고, 여기선 화면에서 눌러서 그대로 되는지 본다. 시각은 page.clock, 난수는 고정.
 const path = require('path');
 const { chromium, startSite, check, finish, SHOTS } = require('./lib.cjs');
 
@@ -22,6 +22,7 @@ function fixRandom() {
 function richState(now) {
   const E = window.DailyFarm.engine;
   const s = E.newState('2026-10', now - 30 * 3600000);
+  s.gift = true; // 시작 보상은 받은 셈 (개수를 정확히 보려고)
   Object.assign(s.built, { field: 6, synth: 1, eff: 2, care: 1, facility: 3, reuse: 2, bounty: 9, explore: 1, equip: 2 });
   s.plots = Array(8).fill(null);
   s.plots[0] = { seed: 0, crop: 'potato', plantedAt: now - 9 * 3600000, readyAt: now - 3600000 };
@@ -80,6 +81,12 @@ function richState(now) {
     await p.keyboard.press('ArrowLeft');
     await p.waitForTimeout(600);
     check(new URL(p.url()).hash === '#farm', '홈에서 왼쪽 = #farm');
+    // 처음 열면 시즌 시작 보상: 즉시 완료권 ×10 · 일반 씨앗 ×10 · 고급 씨앗 ×5 (안내 창)
+    const g0 = await p.evaluate(() => JSON.parse(localStorage.getItem('daily-farm:state')));
+    check((await panelTitle(p)) === '10월 시즌 시작' && await p.locator('#farm .farm-panel .farm-gift .farm-got-cell').count() === 3
+      && g0.gift === true && g0.inv.ticket === 10 && JSON.stringify(g0.inv.seed) === '[10,5,0,0]', `처음 열면 시작 보상 (완료권 ${g0.inv.ticket} · 씨앗 ${g0.inv.seed})`);
+    await shot(p, 'start-gift');
+    await p.keyboard.press('Escape');
     const np = await p.textContent('#farm .farm-coin[data-cur="np"] .farm-coin-n');
     check(np === '21', `NP: 출석 1일 5 + 성공 4 × 3 + 실패 2 × 2 = 21, 9월 기록은 빠짐 (${np})`);
     await p.click('#farm .farm-coin[data-cur="np"]');
@@ -96,6 +103,11 @@ function richState(now) {
   // 2. 탐험 · 심기 · 수확 (처음 상태에서 시간을 보내며)
   {
     const { ctx, p } = await open(null);
+    await p.keyboard.press('Escape'); // 시작 보상 안내 닫기
+    await p.reload();
+    await p.waitForTimeout(300);
+    const g1 = await p.evaluate(() => JSON.parse(localStorage.getItem('daily-farm:state')));
+    check(!(await panelOpen(p)) && g1.inv.ticket === 10, '시작 보상은 시즌에 한 번 (다시 열어도 안 줌)');
     await tab(p, 'explore');
     check(await p.locator('#farm .farm-claim').isDisabled(), '탐험: 막 시작하면 받을 게 없음');
     await p.clock.fastForward(3 * H + 40 * 60000);
@@ -318,6 +330,7 @@ function richState(now) {
     await p.evaluate(() => {
       const E = window.DailyFarm.engine;
       const s = E.newState('2026-10', Date.now());
+      s.gift = true;
       for (let i = 0; i < 103; i++) E.rollGear(s, Math.random);
       localStorage.setItem('daily-farm:state', JSON.stringify(s));
     });
@@ -386,7 +399,8 @@ function richState(now) {
     await p.waitForTimeout(300);
     const st = await p.evaluate(() => ({ s: JSON.parse(localStorage.getItem('daily-farm:state')), h: JSON.parse(localStorage.getItem('daily-farm:history')) }));
     check(st.s.season === '2026-10' && st.s.money === 0 && JSON.stringify(st.h) === JSON.stringify([{ season: '2026-09', done: 3, stars: 6, total: 12 }]), `시즌 넘김: history ${JSON.stringify(st.h)} · 새 시즌`);
-    check((await panelTitle(p)) === '9월 시즌 끝', '새 시즌 첫 진입 → 지난 시즌 결과 안내');
+    check((await panelTitle(p)) === '9월 시즌 끝' && await p.locator('#farm .farm-panel .farm-gift .farm-got-cell').count() === 3 && st.s.inv.ticket === 10,
+      '새 시즌 첫 진입 → 지난 시즌 결과 + 새 시즌 시작 보상');
     await shot(p, 'season');
     const badge = await p.textContent('#home .home-farm');
     check(badge === '🌾 9월 도감 3/12 · ★6' &&await p.locator('#home .home-farm').isVisible(), `홈 프로필에 지난 시즌 도감 배지 (${badge})`);
