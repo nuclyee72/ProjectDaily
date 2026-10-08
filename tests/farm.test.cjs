@@ -127,13 +127,13 @@ function richState(now) {
     await p.locator('#farm .farm-panel .farm-item').first().locator('.farm-btn').first().click();
     check(await p.locator('#farm .farm-plot[data-plot="0"] .farm-plant').count() === 1, '심으면 칸에 새싹');
     const left = await p.textContent('#farm .farm-plot[data-plot="0"] .farm-plot-label');
-    check(left === '8:00', `남은 시간 8:00 (${left})`);
-    await p.clock.fastForward(8 * H - 60000);
+    check(left === '3:00', `남은 시간 3:00 (${left})`);
+    await p.clock.fastForward(3 * H - 60000);
     await p.waitForTimeout(1100);
-    check(!(await p.locator('#farm .farm-plot[data-plot="0"]').evaluate((e) => e.classList.contains('is-ready'))), '7시간 59분 → 아직');
+    check(!(await p.locator('#farm .farm-plot[data-plot="0"]').evaluate((e) => e.classList.contains('is-ready'))), '2시간 59분 → 아직');
     await p.clock.fastForward(61000);
     await p.waitForTimeout(1100);
-    check(await p.locator('#farm .farm-plot[data-plot="0"]').evaluate((e) => e.classList.contains('is-ready')), '8시간 → 다 큼 (수확!)');
+    check(await p.locator('#farm .farm-plot[data-plot="0"]').evaluate((e) => e.classList.contains('is-ready')), '3시간 → 다 큼 (수확!)');
     await shot(p, 'ready');
     await p.click('#farm .farm-plot[data-plot="0"]');
     const st = await p.evaluate(() => JSON.parse(localStorage.getItem('daily-farm:state')));
